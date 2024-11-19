@@ -6,7 +6,7 @@ from pygame.sprite import Sprite
 
 __author__ = 'XSY'
 dic = 'up'
-bad_tank_number = 1
+bad_tank_number = 5
 
 
 class Settings:
@@ -22,6 +22,7 @@ class Settings:
         self.bullet_height = 7
         self.bullet_color = (60, 60, 60)
         self.bad_tank_speed = 0.1  # 增加坏坦克的速度属性
+
 
 
 class BadTank(Sprite):
@@ -162,12 +163,26 @@ class Game:
                     self.bullets.remove(bullet)
             self._update_screen()
 
+    def _update_bad_tanks(self):
+        self.bad_tanks.update()
+
+        if pygame.sprite.sprite.spritecollideany(self.good_tank, self.bad_tanks):
+            print('好坏坦克发生了碰撞.')
+
     def _update_bullets(self):
         """更新子弹的位置，并删除消失的子弹"""
         self.bullets.update()
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0 or bullet.rect.right <= 0 or bullet.rect.left >= self.settings.screen_width:
                 self.bullets.remove(bullet)
+        self._check_bullet_alien_collisions(self)
+
+    def _check_bullet_alien_collisions(self):
+        """响应子弹和坏坦克碰撞"""
+        collections = pygame.sprite.groupcollide(self.bad_tanks, self.bullets, True, True)
+        if not collections:
+            self.bullets.empty()
+            self._create_fleet()
 
     def _check_events(self):
         """响应按键和鼠标事件"""
