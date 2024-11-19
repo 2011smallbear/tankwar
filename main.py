@@ -1,3 +1,4 @@
+import random  # 导入random模块
 import sys
 
 import pygame
@@ -5,6 +6,7 @@ from pygame.sprite import Sprite
 
 __author__ = 'XSY'
 dic = 'up'
+bad_tank_number = 1
 
 
 class Settings:
@@ -19,11 +21,13 @@ class Settings:
         self.bullet_width = 7
         self.bullet_height = 7
         self.bullet_color = (60, 60, 60)
+        self.bad_tank_speed = 0.1  # 增加坏坦克的速度属性
 
 
 class BadTank(Sprite):
     """管理坏坦克的类"""
-    def __init__(self, game):
+
+    def __init__(self, game, speed):
         super().__init__()
         self.screen = game.screen
         self.settings = game.settings
@@ -33,6 +37,29 @@ class BadTank(Sprite):
         self.rect.y = self.rect.height
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
+        self.speed = speed  # 使用传入的速度参数
+
+    def update(self):
+        """随机移动坏坦克"""
+        move_direction = random.choice(['up', 'down', 'left', 'right'])
+        random_number = random.randint(700, 800)
+        for _ in range(random_number):
+            # 移动和改变坦克图片
+            if move_direction == 'up' and self.rect.top > 0:
+                self.y -= self.speed
+                self.image = pygame.image.load('image/turn0bad.png')
+            elif move_direction == 'down' and self.rect.bottom < self.screen.get_rect().bottom:
+                self.y += self.speed
+                self.image = pygame.image.load('image/turn180bad.png')
+            elif move_direction == 'left' and self.rect.left > 0:
+                self.x -= self.speed
+                self.image = pygame.image.load('image/turn270bad.png')
+            elif move_direction == 'right' and self.rect.right < self.screen.get_rect().right:
+                self.x += self.speed
+                self.image = pygame.image.load('image/turn90bad.png')
+
+        self.rect.x = self.x
+        self.rect.y = self.y
 
 
 class Bullet(Sprite):
@@ -47,7 +74,6 @@ class Bullet(Sprite):
         self.rect.midtop = game.good_tank.rect.midtop
         self.y = float(self.rect.y)
         self.x = float(self.rect.x)
-        # 方向标识
         self.dic = game.dic
 
     def update(self):
@@ -67,7 +93,6 @@ class Bullet(Sprite):
         pygame.draw.rect(self.screen, self.color, self.rect)
 
 
-
 class GoodTank:
     """管理好坦克的类"""
 
@@ -82,7 +107,6 @@ class GoodTank:
 
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
-        # 移动标志
         self.moving_right = False
         self.moving_left = False
         self.moving_up = False
@@ -123,11 +147,16 @@ class Game:
         self._create_fleet()
 
     def run_game(self):
+        a = 1
         while True:
+            a += 1
             self._check_events()
             self.good_tank.update()
             self._update_bullets()
-
+            if a % 500 == 0:
+                a = 0
+                # 更新坏坦克的位置
+                self.bad_tanks.update()
             for bullet in self.bullets.copy():
                 if bullet.rect.bottom <= 0 or bullet.rect.right <= 0 or bullet.rect.left >= self.settings.screen_width:
                     self.bullets.remove(bullet)
@@ -139,6 +168,7 @@ class Game:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0 or bullet.rect.right <= 0 or bullet.rect.left >= self.settings.screen_width:
                 self.bullets.remove(bullet)
+
     def _check_events(self):
         """响应按键和鼠标事件"""
         for event in pygame.event.get():
@@ -165,13 +195,10 @@ class Game:
                     match event.key:
                         case pygame.K_RIGHT:
                             self.good_tank.moving_right = False
-
                         case pygame.K_LEFT:
                             self.good_tank.moving_left = False
-
                         case pygame.K_UP:
                             self.good_tank.moving_up = False
-
                         case pygame.K_DOWN:
                             self.good_tank.moving_down = False
 
@@ -181,8 +208,9 @@ class Game:
 
     def _create_fleet(self):
         """创建坏坦克群"""
-        bad_tank = BadTank(self)
-        self.bad_tanks.add(bad_tank)
+        for _ in range(bad_tank_number):
+            bad_tank = BadTank(self, self.settings.bad_tank_speed)  # 使用Settings类中的坏坦克速度属性
+            self.bad_tanks.add(bad_tank)
 
     def _update_screen(self):
         """更新屏幕上的图像，并切换到新屏幕"""
