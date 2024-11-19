@@ -21,11 +21,25 @@ class Settings:
         self.bullet_color = (60, 60, 60)
 
 
+class BadTank(Sprite):
+    """管理坏坦克的类"""
+    def __init__(self, game):
+        super().__init__()
+        self.screen = game.screen
+        self.settings = game.settings
+        self.image = pygame.image.load('image/turn0bad.png')
+        self.rect = self.image.get_rect()
+        self.rect.x = self.rect.width
+        self.rect.y = self.rect.height
+        self.x = float(self.rect.x)
+        self.y = float(self.rect.y)
+
+
 class Bullet(Sprite):
     """管理子弹的类"""
 
     def __init__(self, game):
-        # super().__init__()
+        super().__init__()
         self.screen = game.screen
         self.settings = game.settings
         self.color = self.settings.bullet_color
@@ -52,23 +66,6 @@ class Bullet(Sprite):
         """在屏幕上绘制子弹"""
         pygame.draw.rect(self.screen, self.color, self.rect)
 
-
-class BadTank(Sprite):
-    """管理坏坦克的类"""
-
-    def __init__(self, game):
-        super.__init__()
-        self.screen = game.screen
-        self.screen_rect = self.screen.get_rect()
-        self.image = pygame.image.load('image/turn0bad.png')
-        self.rect = self.image.get_rect()
-        self.rect.x = self.rect.width
-        self.rect.y = self.rect.height
-        self.x = float(self.rect.x)
-        self.y = float(self.rect.y)
-
-    def blitme(self):
-        self.screen.blit(self.image, self.rect)
 
 
 class GoodTank:
@@ -121,15 +118,16 @@ class Game:
         self.settings = Settings()
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
         self.good_tank = GoodTank(self, self.settings)
-        self.bad_tank = BadTank(self)
         self.bullet = Bullet(self)
+        self.bad_tanks = pygame.sprite.Group()
+        self._create_fleet()
 
     def run_game(self):
         while True:
             self._check_events()
             self.good_tank.update()
-            self.bad_tank.blitme()
             self._update_bullets()
+
             for bullet in self.bullets.copy():
                 if bullet.rect.bottom <= 0 or bullet.rect.right <= 0 or bullet.rect.left >= self.settings.screen_width:
                     self.bullets.remove(bullet)
@@ -141,7 +139,6 @@ class Game:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0 or bullet.rect.right <= 0 or bullet.rect.left >= self.settings.screen_width:
                 self.bullets.remove(bullet)
-
     def _check_events(self):
         """响应按键和鼠标事件"""
         for event in pygame.event.get():
@@ -182,13 +179,18 @@ class Game:
         new_bullet = Bullet(self)
         self.bullets.add(new_bullet)
 
+    def _create_fleet(self):
+        """创建坏坦克群"""
+        bad_tank = BadTank(self)
+        self.bad_tanks.add(bad_tank)
+
     def _update_screen(self):
         """更新屏幕上的图像，并切换到新屏幕"""
         self.screen.fill(self.settings.bg_color)
         self.good_tank.blitme()  # 在屏幕上绘制好坦克
-        self.bad_tank.blitme()  # 在屏幕上绘制坏坦克
         for bullet in self.bullets.sprites():
             bullet.draw()
+        self.bad_tanks.draw(self.screen)
         pygame.display.flip()
 
 
