@@ -1,7 +1,9 @@
 import random
 import sys
+import time
 
 import pygame
+import pygame.font
 from pygame.sprite import Sprite
 
 __author__ = 'XSY'
@@ -24,6 +26,34 @@ class Settings:
         self.default_direction = 'up'
         self.bad_tank_num = 3
         self.ship_left = 3
+        self.every_normal_bad_tank = 10
+
+
+class ScoreBoard:
+    def __init__(self, game):
+        self.settings = game.settings
+        self.screen = game.screen
+        self.sreen_rect = self.screen.get_rect()
+        self.text_color = (30, 30, 30)
+        self.score = 0
+        self.font = pygame.font.SysFont(None, 48)
+        self.prep_score()
+
+    def prep_score(self):
+        self.score_str = str(self.score)
+        self.score_image = self.font.render(self.score_str, True, self.text_color, self.settings.bg_color)
+        self.score_rect = self.score_image.get_rect()
+        self.score_rect.right = self.sreen_rect.right - 20
+        self.score_rect.top = 20
+
+    def show_score(self):
+        self.screen.blit(self.score_image, self.score_rect)
+
+
+class Music:
+    def __init__(self):
+        self.blast = pygame.mixer.Sound('music/爆炸.mp3')
+        self.shoot = pygame.mixer.Sound('music/射击.mp3')
 
 
 class Bullet(Sprite):
@@ -151,10 +181,15 @@ class GoodTank:
             self.rect.y += self.settings.tank_speed
             self.image = pygame.image.load('image/turn180good.png')
 
-
     def blitme(self):
         """在指定位置绘制好坦克"""
         self.screen.blit(self.image, self.rect)
+
+    def center_tank(self):
+        """将坦克居中"""
+        self.rect.midbottom = self.screen_rect.midbottom
+        self.x = float(self.rect.x)
+        self.y = float(self.rect.y)
 
 
 class Game:
@@ -162,13 +197,16 @@ class Game:
 
     def __init__(self):
         pygame.init()
-        self.bullets = pygame.sprite.Group()
+        pygame.display.set_caption('坦克大战')
+        pygame.mixer.init()
         self.settings = Settings()
-        self.dic = self.settings.default_direction  # 修改
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
+        self.music = Music()
+        self.sb = ScoreBoard(self)
+        self.dic = self.settings.default_direction
         self.good_tank = GoodTank(self, self.settings)
         self.bad_tanks = pygame.sprite.Group()
-        self.bullet = Bullet(self)
+        self.bullets = pygame.sprite.Group()
         self._create_fleet()
 
     def run_game(self):
@@ -186,14 +224,24 @@ class Game:
     def _check_collision(self):
         """检查好坦克与坏坦克的碰撞"""
         if pygame.sprite.spritecollideany(self.good_tank, self.bad_tanks):
-            self.settings.ship_left -= 1
+            self._ship_hit()
             if self.settings.ship_left == 0:
                 self._game_over()
+
+    def _ship_hit(self):
+        """响应好坦克被撞到"""
+        self.settings.ship_left -= 1
+        self.bad_tanks.empty()
+        self.bullets.empty()
+        self._create_fleet()
+        self.good_tank.center_tank()
+        time.sleep(0.5)
 
     def _game_over(self):
         """游戏结束"""
         pygame.quit()
         sys.exit()
+
     def _update_bad_tanks(self):
         """更新坏坦克的位置"""
         for bad_tank in self.bad_tanks.sprites():
@@ -211,7 +259,19 @@ class Game:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0 or bullet.rect.right <= 0 or bullet.rect.left >= self.settings.screen_width:
                 self.bullets.remove(bullet)
+        self._check_bullet_bad_tanks_collision()
+
+    def _check_bullet_bad_tanks_collision(self):
+        """检查子弹与坏坦克的碰撞"""
         collisions = pygame.sprite.groupcollide(self.bullets, self.bad_tanks, True, True)
+        if collisions:
+            self.music.blast.play()
+            self.sb.score += self.settings.every_normal_bad_tank
+            self.sb.prep_score()
+        if not self.bad_tanks:
+            self.bullets.empty()
+            self._create_fleet()
+
 
     def _check_events(self):
         """响应按键和鼠标事件"""
@@ -252,6 +312,7 @@ class Game:
     def _fire_bullet(self):
         new_bullet = Bullet(self)
         self.bullets.add(new_bullet)
+        self.music.shoot.play()
 
     def _update_screen(self):
         """更新屏幕上的图像，并切换到新屏幕"""
@@ -260,6 +321,7 @@ class Game:
         for bullet in self.bullets.sprites():
             bullet.draw()
         self.bad_tanks.draw(self.screen)
+        self.sb.show_score()
         pygame.display.flip()
 
 
