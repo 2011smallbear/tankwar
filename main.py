@@ -29,6 +29,21 @@ class Settings:
         self.every_normal_bad_tank = 10
 
 
+class BloodDisplay:
+    def __init__(self, game):
+        self.screen = game.screen
+        self.settings = game.settings
+        self.blood_image = pygame.image.load('image/血量.png')
+        self.blood_rect = self.blood_image.get_rect()
+        self.blood_rect.topleft = (10, 10)  # 设置血量显示的位置
+
+    def draw(self):
+        """绘制剩余的血量"""
+        for i in range(self.settings.ship_left):
+            blood_position = self.blood_rect.topleft
+            blood_position = (blood_position[0] + i * (self.blood_rect.width + 5), blood_position[1])
+            self.screen.blit(self.blood_image, blood_position)
+
 class ScoreBoard:
     def __init__(self, game):
         self.settings = game.settings
@@ -207,6 +222,7 @@ class Game:
         self.good_tank = GoodTank(self, self.settings)
         self.bad_tanks = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
+        self.blood_display = BloodDisplay(self)
         self._create_fleet()
 
     def run_game(self):
@@ -235,6 +251,7 @@ class Game:
         self.bullets.empty()
         self._create_fleet()
         self.good_tank.center_tank()
+        self.blood_display.draw()
         time.sleep(0.5)
 
     def _game_over(self):
@@ -322,6 +339,7 @@ class Game:
             bullet.draw()
         self.bad_tanks.draw(self.screen)
         self.sb.show_score()
+        self.blood_display.draw()
         pygame.display.flip()
 
 
