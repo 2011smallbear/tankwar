@@ -29,6 +29,36 @@ class Settings:
         self.every_normal_bad_tank = 10
 
 
+class Explosion(Sprite):
+    """管理爆炸效果的类"""
+
+    def __init__(self, game, center):
+        super().__init__()
+        self.screen = game.screen
+        self.explosion_images = [pygame.image.load(f'image/{i}.gif') for i in range(11)]
+        self.rect = self.explosion_images[0].get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.time_created = pygame.time.get_ticks()
+        self.image = self.explosion_images[0]
+
+    def update(self):
+        """更新爆炸效果"""
+        current_time = pygame.time.get_ticks()
+        if current_time - self.time_created > 50:
+            self.time_created = current_time
+            self.frame += 1
+            if self.frame == len(self.explosion_images):
+                self.kill()
+            else:
+                self.image = self.explosion_images[self.frame]
+
+    def draw(self):
+        """在屏幕上绘制爆炸效果"""
+        self.screen.blit(self.image, self.rect)
+
+
+
 class BloodDisplay:
     def __init__(self, game):
         self.screen = game.screen
@@ -43,6 +73,7 @@ class BloodDisplay:
             blood_position = self.blood_rect.topleft
             blood_position = (blood_position[0] + i * (self.blood_rect.width + 5), blood_position[1])
             self.screen.blit(self.blood_image, blood_position)
+
 
 class ScoreBoard:
     def __init__(self, game):
@@ -112,13 +143,13 @@ class BadTank(Sprite):
         self.screen_rect = self.screen.get_rect()
         self.image = pygame.image.load('image/turn0bad.png')
         self.rect = self.image.get_rect()
-        self.rect.x = self.rect.width
-        self.rect.y = self.rect.height
+        self.rect.x = random.randint(0, self.screen_rect.width - self.rect.width)
+        self.rect.y = random.randint(0, self.screen_rect.height - self.rect.height)
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
         self.settings = game.settings
-        self.tank_speed = self.settings.bad_tank_speed  # 修改
-        self.dic = self.settings.default_direction  # 修改
+        self.tank_speed = self.settings.bad_tank_speed
+        self.dic = self.settings.default_direction
         self.last_move_time = 0
 
     def blitme(self):
@@ -262,7 +293,8 @@ class Game:
     def _update_bad_tanks(self):
         """更新坏坦克的位置"""
         for bad_tank in self.bad_tanks.sprites():
-            bad_tank.random_move()
+            if isinstance(bad_tank, BadTank):
+                bad_tank.random_move()
             bad_tank.update()
 
     def _create_fleet(self):
@@ -285,10 +317,13 @@ class Game:
             self.music.blast.play()
             self.sb.score += self.settings.every_normal_bad_tank
             self.sb.prep_score()
+            for bad_tank in collisions.values():
+                for tank in bad_tank:
+                    explosion = Explosion(self, tank.rect.center)
+                    self.bad_tanks.add(explosion)
         if not self.bad_tanks:
             self.bullets.empty()
             self._create_fleet()
-
 
     def _check_events(self):
         """响应按键和鼠标事件"""
@@ -337,7 +372,11 @@ class Game:
         self.good_tank.blitme()  # 在屏幕上绘制好坦克
         for bullet in self.bullets.sprites():
             bullet.draw()
-        self.bad_tanks.draw(self.screen)
+        for explosion in self.bad_tanks.sprites():
+            if isinstance(explosion, Explosion):
+                explosion.draw()
+            else:
+                explosion.blitme()
         self.sb.show_score()
         self.blood_display.draw()
         pygame.display.flip()
