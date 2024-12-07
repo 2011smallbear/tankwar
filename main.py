@@ -16,17 +16,60 @@ class Settings:
     def __init__(self):
         self.screen_width = 900
         self.screen_height = 900
-        self.bg_color = (255, 255, 255)
+        self.bg_color = (0, 0, 0)
         self.tank_speed = 1.2
         self.bad_tank_speed = self.tank_speed / 2
         self.bullet_speed = 2.0
         self.bullet_width = 7
         self.bullet_height = 7
-        self.bullet_color = (60, 60, 60)
+        self.bullet_color = (128, 128, 128)
+        self.text_color = (255, 255, 255)
         self.default_direction = 'up'
         self.bad_tank_num = 3
         self.ship_left = 3
-        self.every_normal_bad_tank = 10
+        self.bad_tank1_blood = 5
+        self.bad_tank2_blood = 2
+        self.evey_shoot = 10
+        self.blast = pygame.mixer.Sound('music/爆炸.mp3')
+        self.shoot = pygame.mixer.Sound('music/射击.mp3')
+        self.strike = pygame.mixer.Sound('music/撞击.mp3')
+
+
+class BloodDisplay:
+    def __init__(self, game):
+        self.screen = game.screen
+        self.settings = game.settings
+        self.blood_image = pygame.image.load('image/血量.png')
+        self.blood_rect = self.blood_image.get_rect()
+        self.blood_rect.topleft = (10, 10)  # 设置血量显示的位置
+
+    def draw(self):
+        """绘制剩余的血量"""
+        for i in range(self.settings.ship_left):
+            blood_position = self.blood_rect.topleft
+            blood_position = (blood_position[0] + i * (self.blood_rect.width + 5), blood_position[1])
+            self.screen.blit(self.blood_image, blood_position)
+
+
+class ScoreBoard:
+    def __init__(self, game):
+        self.settings = game.settings
+        self.screen = game.screen
+        self.sreen_rect = self.screen.get_rect()
+        self.text_color = self.settings.text_color
+        self.score = 0
+        self.font = pygame.font.SysFont(None, 48)
+        self.prep_score()
+
+    def prep_score(self):
+        self.score_str = str(self.score)
+        self.score_image = self.font.render(self.score_str, True, self.text_color, self.settings.bg_color)
+        self.score_rect = self.score_image.get_rect()
+        self.score_rect.right = self.sreen_rect.right - 20
+        self.score_rect.top = 20
+
+    def show_score(self):
+        self.screen.blit(self.score_image, self.score_rect)
 
 
 class Explosion(Sprite):
@@ -56,50 +99,6 @@ class Explosion(Sprite):
     def draw(self):
         """在屏幕上绘制爆炸效果"""
         self.screen.blit(self.image, self.rect)
-
-
-
-class BloodDisplay:
-    def __init__(self, game):
-        self.screen = game.screen
-        self.settings = game.settings
-        self.blood_image = pygame.image.load('image/血量.png')
-        self.blood_rect = self.blood_image.get_rect()
-        self.blood_rect.topleft = (10, 10)  # 设置血量显示的位置
-
-    def draw(self):
-        """绘制剩余的血量"""
-        for i in range(self.settings.ship_left):
-            blood_position = self.blood_rect.topleft
-            blood_position = (blood_position[0] + i * (self.blood_rect.width + 5), blood_position[1])
-            self.screen.blit(self.blood_image, blood_position)
-
-
-class ScoreBoard:
-    def __init__(self, game):
-        self.settings = game.settings
-        self.screen = game.screen
-        self.sreen_rect = self.screen.get_rect()
-        self.text_color = (30, 30, 30)
-        self.score = 0
-        self.font = pygame.font.SysFont(None, 48)
-        self.prep_score()
-
-    def prep_score(self):
-        self.score_str = str(self.score)
-        self.score_image = self.font.render(self.score_str, True, self.text_color, self.settings.bg_color)
-        self.score_rect = self.score_image.get_rect()
-        self.score_rect.right = self.sreen_rect.right - 20
-        self.score_rect.top = 20
-
-    def show_score(self):
-        self.screen.blit(self.score_image, self.score_rect)
-
-
-class Music:
-    def __init__(self):
-        self.blast = pygame.mixer.Sound('music/爆炸.mp3')
-        self.shoot = pygame.mixer.Sound('music/射击.mp3')
 
 
 class Bullet(Sprite):
@@ -134,11 +133,11 @@ class Bullet(Sprite):
         pygame.draw.rect(self.screen, self.color, self.rect)
 
 
-class BadTank(Sprite):
+class BadTank1(Sprite):
     """管理坏坦克的类"""
 
     def __init__(self, game):
-        super(BadTank, self).__init__()
+        super(BadTank1, self).__init__()
         self.screen = game.screen
         self.screen_rect = self.screen.get_rect()
         self.image = pygame.image.load('image/turn0bad.png')
@@ -151,6 +150,7 @@ class BadTank(Sprite):
         self.tank_speed = self.settings.bad_tank_speed
         self.dic = self.settings.default_direction
         self.last_move_time = 0
+        self.blood = self.settings.bad_tank1_blood
 
     def blitme(self):
         self.screen.blit(self.image, self.rect)
@@ -184,6 +184,46 @@ class BadTank(Sprite):
                 if self.rect.left > 0:  # 检查是否超出左边界
                     self.x -= self.tank_speed * 100
                     self.image = pygame.image.load('image\\turn270bad.png')
+                else:
+                    self.random_move()
+
+            self.rect.y = self.y
+            self.rect.x = self.x
+            self.last_move_time = current_time
+
+
+class BadTank2(BadTank1):
+    """管理第二种坏坦克的类"""
+
+    def __init__(self, game):
+        super(BadTank2, self).__init__(game)
+        self.image = pygame.image.load('image/tankU.gif')
+
+    def update(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_move_time > 1000:  # 检查当前时间与last_move_time的差值是否大于1000毫秒
+            if self.dic == 'up':
+                if self.rect.top > 0:  # 检查是否超出上边界
+                    self.y -= self.tank_speed * 100
+                    self.image = pygame.image.load('image\\tankU.gif')
+                else:
+                    self.random_move()  # 碰到边缘时随机改变方向
+            elif self.dic == 'down':
+                if self.rect.bottom < self.screen_rect.bottom:  # 检查是否超出下边界
+                    self.y += self.tank_speed * 100
+                    self.image = pygame.image.load('image\\tankD.gif')
+                else:
+                    self.random_move()
+            elif self.dic == 'right':
+                if self.rect.right < self.screen_rect.right:  # 检查是否超出右边界
+                    self.x += self.tank_speed * 100
+                    self.image = pygame.image.load('image\\tankR.gif')
+                else:
+                    self.random_move()
+            elif self.dic == 'left':
+                if self.rect.left > 0:  # 检查是否超出左边界
+                    self.x -= self.tank_speed * 100
+                    self.image = pygame.image.load('image\\tankL.gif')
                 else:
                     self.random_move()
 
@@ -247,7 +287,6 @@ class Game:
         pygame.mixer.init()
         self.settings = Settings()
         self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
-        self.music = Music()
         self.sb = ScoreBoard(self)
         self.dic = self.settings.default_direction
         self.good_tank = GoodTank(self, self.settings)
@@ -293,14 +332,19 @@ class Game:
     def _update_bad_tanks(self):
         """更新坏坦克的位置"""
         for bad_tank in self.bad_tanks.sprites():
-            if isinstance(bad_tank, BadTank):
+            if isinstance(bad_tank, BadTank1):
                 bad_tank.random_move()
             bad_tank.update()
 
     def _create_fleet(self):
         for i in range(self.settings.bad_tank_num):
-            bad_tank = BadTank(self)
-            self.bad_tanks.add(bad_tank)
+            result = random.choice(['bad1', 'bad2', 'bad2'])
+            if result == 'bad1':
+                bad_tank = BadTank1(self)
+                self.bad_tanks.add(bad_tank)
+            elif result == 'bad2':
+                bad_tank = BadTank2(self)
+                self.bad_tanks.add(bad_tank)
 
     def _update_bullets(self):
         """更新子弹的位置，并删除消失的子弹"""
@@ -312,15 +356,27 @@ class Game:
 
     def _check_bullet_bad_tanks_collision(self):
         """检查子弹与坏坦克的碰撞"""
-        collisions = pygame.sprite.groupcollide(self.bullets, self.bad_tanks, True, True)
+        collisions = pygame.sprite.groupcollide(self.bullets, self.bad_tanks, True, False)  # 修改为False，不删除坏坦克
         if collisions:
-            self.music.blast.play()
-            self.sb.score += self.settings.every_normal_bad_tank
+            self.settings.strike.play()
+            self.sb.score += self.settings.evey_shoot
             self.sb.prep_score()
             for bad_tank in collisions.values():
                 for tank in bad_tank:
-                    explosion = Explosion(self, tank.rect.center)
-                    self.bad_tanks.add(explosion)
+                    
+                    if isinstance(tank, BadTank1):  # 检查对象是否为BadTank
+                        tank.blood -= 1  # 减少坏坦克的血量
+                        if tank.blood <= 0:  # 如果坏坦克的血量降到0，则删除坏坦克
+                            self.settings.blast.play()
+                            explosion = Explosion(self, tank.rect.center)
+                            self.bad_tanks.add(explosion)
+                            self.bad_tanks.remove(tank)
+                    if isinstance(tank, BadTank2):  # 检查对象是否为BadTank2
+                        self.settings.blast.play()
+                        explosion = Explosion(self, tank.rect.center)
+                        self.bad_tanks.add(explosion)
+                        self.bad_tanks.remove(tank)
+
         if not self.bad_tanks:
             self.bullets.empty()
             self._create_fleet()
@@ -364,7 +420,7 @@ class Game:
     def _fire_bullet(self):
         new_bullet = Bullet(self)
         self.bullets.add(new_bullet)
-        self.music.shoot.play()
+        self.settings.shoot.play()
 
     def _update_screen(self):
         """更新屏幕上的图像，并切换到新屏幕"""
