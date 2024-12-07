@@ -25,11 +25,14 @@ class Settings:
         self.bullet_color = (128, 128, 128)
         self.text_color = (255, 255, 255)
         self.default_direction = 'up'
-        self.bad_tank_num = 3
+        self.bad_tank_num = 6
         self.ship_left = 3
-        self.bad_tank1_blood = 5
-        self.bad_tank2_blood = 2
+        self.bad_tank1_blood = 7
+        self.bad_tank2_blood = 5
         self.evey_shoot = 10
+        self.blood_color = (128, 0, 128)
+        self.blood_image = pygame.image.load('image/血量.png')
+        self.bullet_image = pygame.image.load('image/弹丸.png')
         self.blast = pygame.mixer.Sound('music/爆炸.mp3')
         self.shoot = pygame.mixer.Sound('music/射击.mp3')
         self.strike = pygame.mixer.Sound('music/撞击.mp3')
@@ -39,7 +42,7 @@ class BloodDisplay:
     def __init__(self, game):
         self.screen = game.screen
         self.settings = game.settings
-        self.blood_image = pygame.image.load('image/血量.png')
+        self.blood_image = self.settings.blood_image
         self.blood_rect = self.blood_image.get_rect()
         self.blood_rect.topleft = (10, 10)  # 设置血量显示的位置
 
@@ -108,13 +111,14 @@ class Bullet(Sprite):
         super().__init__()
         self.screen = game.screen
         self.settings = game.settings
-        self.color = self.settings.bullet_color
-        self.rect = pygame.Rect(0, 0, self.settings.bullet_width, self.settings.bullet_height)
-        self.rect.midtop = game.good_tank.rect.midtop
+        self.image = pygame.image.load('image/弹丸.png')  # 加载子弹图片
+        self.rect = self.image.get_rect()  # 初始化rect属性
+        self.rect.midtop = game.good_tank.rect.midtop  # 设置子弹初始位置
         self.y = float(self.rect.y)
         self.x = float(self.rect.x)
         # 方向标识
         self.dic = game.dic
+
 
     def update(self):
         if self.dic == 'up':
@@ -130,7 +134,7 @@ class Bullet(Sprite):
 
     def draw(self):
         """在屏幕上绘制子弹"""
-        pygame.draw.rect(self.screen, self.color, self.rect)
+        self.screen.blit(self.image, self.rect)  # 使用图像绘制子弹
 
 
 class BadTank1(Sprite):
@@ -154,6 +158,9 @@ class BadTank1(Sprite):
 
     def blitme(self):
         self.screen.blit(self.image, self.rect)
+        # 绘制血条
+        blood_bar_width = (self.blood / self.settings.bad_tank1_blood) * self.rect.width
+        pygame.draw.rect(self.screen, self.settings.blood_color, (self.rect.x, self.rect.y - 10, blood_bar_width, 5))
 
     def random_move(self):
         directions = ['up', 'down', 'left', 'right']
@@ -198,6 +205,7 @@ class BadTank2(BadTank1):
     def __init__(self, game):
         super(BadTank2, self).__init__(game)
         self.image = pygame.image.load('image/tankU.gif')
+        self.blood = self.settings.bad_tank2_blood  # 添加血量属性
 
     def update(self):
         current_time = pygame.time.get_ticks()
@@ -242,7 +250,7 @@ class GoodTank:
 
         self.image = pygame.image.load('image/turn0good.png')
         self.rect = self.image.get_rect()
-        self.rect.midbottom = self.screen_rect.midbottom
+        self.rect.center = self.screen_rect.center
 
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
@@ -361,17 +369,10 @@ class Game:
             self.settings.strike.play()
             self.sb.score += self.settings.evey_shoot
             self.sb.prep_score()
-            for bad_tank in collisions.values():
-                for tank in bad_tank:
-                    
-                    if isinstance(tank, BadTank1):  # 检查对象是否为BadTank
-                        tank.blood -= 1  # 减少坏坦克的血量
-                        if tank.blood <= 0:  # 如果坏坦克的血量降到0，则删除坏坦克
-                            self.settings.blast.play()
-                            explosion = Explosion(self, tank.rect.center)
-                            self.bad_tanks.add(explosion)
-                            self.bad_tanks.remove(tank)
-                    if isinstance(tank, BadTank2):  # 检查对象是否为BadTank2
+            for bad_tank_list in collisions.values():
+                for tank in bad_tank_list:
+                    tank.blood -= 1
+                    if tank.blood <= 0:
                         self.settings.blast.play()
                         explosion = Explosion(self, tank.rect.center)
                         self.bad_tanks.add(explosion)
