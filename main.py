@@ -2,6 +2,10 @@ import random
 import sys
 import time
 
+
+from tkinter import *
+import tkinter as tk
+
 import pygame
 import pygame.font
 from pygame.sprite import Sprite
@@ -87,6 +91,7 @@ class Explosion(Sprite):
         self.frame = 0
         self.time_created = pygame.time.get_ticks()
         self.image = self.explosion_images[0]
+        self.alpha = 255  # 初始透明度
 
     def update(self):
         """更新爆炸效果"""
@@ -98,6 +103,10 @@ class Explosion(Sprite):
                 self.kill()
             else:
                 self.image = self.explosion_images[self.frame]
+                self.alpha -= 25  # 每次更新减少透明度
+                if self.alpha < 0:
+                    self.alpha = 0
+                self.image.set_alpha(self.alpha)  # 设置图像透明度
 
     def draw(self):
         """在屏幕上绘制爆炸效果"""
@@ -118,7 +127,6 @@ class Bullet(Sprite):
         self.x = float(self.rect.x)
         # 方向标识
         self.dic = game.dic
-
 
     def update(self):
         if self.dic == 'up':
@@ -304,6 +312,10 @@ class Game:
         self._create_fleet()
 
     def run_game(self):
+
+        self._exercise()
+
+    def _exercise(self):
         while True:
             self._check_collision()
             self._check_events()
@@ -371,12 +383,13 @@ class Game:
             self.sb.prep_score()
             for bad_tank_list in collisions.values():
                 for tank in bad_tank_list:
-                    tank.blood -= 1
-                    if tank.blood <= 0:
-                        self.settings.blast.play()
-                        explosion = Explosion(self, tank.rect.center)
-                        self.bad_tanks.add(explosion)
-                        self.bad_tanks.remove(tank)
+                    if isinstance(tank, (BadTank1, BadTank2)):  # 确保tank是BadTank1或BadTank2的实例
+                        tank.blood -= 1
+                        if tank.blood <= 0:
+                            self.settings.blast.play()
+                            explosion = Explosion(self, tank.rect.center)
+                            self.bad_tanks.add(explosion)
+                            self.bad_tanks.remove(tank)
 
         if not self.bad_tanks:
             self.bullets.empty()
