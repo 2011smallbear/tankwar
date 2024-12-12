@@ -390,14 +390,15 @@ class Game:
         if collisions:
             self.settings.strike.play()
             self.sb.prep_score()
-            for bad_tank_list in collisions.values():
+            for bullet, bad_tank_list in collisions.items():
                 for tank in bad_tank_list:
                     if isinstance(tank, (BadTank1, BadTank2)):
-                        if isinstance(tank, BadTank1):
+                        if bullet.color == 'yellow':
                             tank.blood -= self.settings.yellow_shoot_damage
                             self.sb.score += self.settings.every_shoot_score_1
-                        elif isinstance(tank, BadTank2):
-                            tank.blood -= self.settings.self.red_shoot_damage
+
+                        elif bullet.color == 'red':
+                            tank.blood -= self.settings.red_shoot_damage
                             self.sb.score += self.settings.every_shoot_score_2
 
                         # 检查血量
