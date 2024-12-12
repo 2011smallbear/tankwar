@@ -2,10 +2,6 @@ import random
 import sys
 import time
 
-
-from tkinter import *
-import tkinter as tk
-
 import pygame
 import pygame.font
 from pygame.sprite import Sprite
@@ -33,10 +29,13 @@ class Settings:
         self.ship_left = 3
         self.bad_tank1_blood = 7
         self.bad_tank2_blood = 5
-        self.evey_shoot = 10
+        self.every_shoot_score_1 = 10
+        self.every_shoot_score_2 = 20
+        self.yellow_shoot_damage = 1
+        self.red_shoot_damage = 2
         self.blood_color = (128, 0, 128)
-        self.blood_image = pygame.image.load('image/血量.png')
-        self.bullet_image = pygame.image.load('image/弹丸.png')
+        self.blood_image = pygame.image.load('image/blood.png')
+        self.bullet_image = pygame.image.load('image/bullet1.png')
         self.blast = pygame.mixer.Sound('music/爆炸.mp3')
         self.shoot = pygame.mixer.Sound('music/射击.mp3')
         self.strike = pygame.mixer.Sound('music/撞击.mp3')
@@ -113,15 +112,16 @@ class Explosion(Sprite):
         self.screen.blit(self.image, self.rect)
 
 
-class Bullet(Sprite):
+class Bullet1(Sprite):
     """管理子弹的类"""
 
     def __init__(self, game):
         super().__init__()
         self.screen = game.screen
         self.settings = game.settings
-        self.image = pygame.image.load('image/弹丸.png')  # 加载子弹图片
+        self.image = pygame.image.load('image/bullet1.png')  # 加载子弹图片
         self.rect = self.image.get_rect()  # 初始化rect属性
+        self.color = 'yellow'
         self.rect.midtop = game.good_tank.rect.midtop  # 设置子弹初始位置
         self.y = float(self.rect.y)
         self.x = float(self.rect.x)
@@ -143,6 +143,16 @@ class Bullet(Sprite):
     def draw(self):
         """在屏幕上绘制子弹"""
         self.screen.blit(self.image, self.rect)  # 使用图像绘制子弹
+
+
+class Bullet2(Bullet1):
+    """管理子弹的类"""
+
+    def __init__(self, game):
+        super(Bullet2, self).__init__(game)
+        self.image = pygame.image.load('image/bullet2.png')  # 修改图像属性
+        self.rect = self.image.get_rect()
+        self.color = 'red'
 
 
 class BadTank1(Sprite):
@@ -168,7 +178,7 @@ class BadTank1(Sprite):
         self.screen.blit(self.image, self.rect)
         # 绘制血条
         blood_bar_width = (self.blood / self.settings.bad_tank1_blood) * self.rect.width
-        pygame.draw.rect(self.screen, self.settings.blood_color, (self.rect.x, self.rect.y - 10, blood_bar_width, 5))
+        pygame.draw.rect(self.screen, self.settings.blood_color, (self.rect.x, self.rect.y, blood_bar_width, 5))
 
     def random_move(self):
         directions = ['up', 'down', 'left', 'right']
@@ -332,7 +342,7 @@ class Game:
         if pygame.sprite.spritecollideany(self.good_tank, self.bad_tanks):
             self._ship_hit()
             if self.settings.ship_left == 0:
-                self._game_over()
+                self._one_game_over()
 
     def _ship_hit(self):
         """响应好坦克被撞到"""
@@ -344,8 +354,8 @@ class Game:
         self.blood_display.draw()
         time.sleep(0.5)
 
-    def _game_over(self):
-        """游戏结束"""
+    def _one_game_over(self):
+        """ 单次游戏结束"""
         pygame.quit()
         sys.exit()
 
@@ -379,17 +389,22 @@ class Game:
         collisions = pygame.sprite.groupcollide(self.bullets, self.bad_tanks, True, False)  # 修改为False，不删除坏坦克
         if collisions:
             self.settings.strike.play()
-            self.sb.score += self.settings.evey_shoot
             self.sb.prep_score()
             for bad_tank_list in collisions.values():
                 for tank in bad_tank_list:
-                    if isinstance(tank, (BadTank1, BadTank2)):  # 确保tank是BadTank1或BadTank2的实例
-                        tank.blood -= 1
-                        if tank.blood <= 0:
-                            self.settings.blast.play()
-                            explosion = Explosion(self, tank.rect.center)
-                            self.bad_tanks.add(explosion)
-                            self.bad_tanks.remove(tank)
+                    if isinstance(tank, BadTank1):
+                        tank.blood -= self.settings.self.yellow_shoot_damage
+                        self.sb.score += self.settings.every_shoot_score_1
+                    elif isinstance(tank, BadTank2):
+                        tank.blood -= self.settings.self.red_shoot_damage
+                        self.sb.score += self.settings.every_shoot_score_2
+
+                    # 检查血量
+                    if tank.blood <= 0:
+                        self.settings.blast.play()
+                        explosion = Explosion(self, tank.rect.center)
+                        self.bad_tanks.add(explosion)
+                        self.bad_tanks.remove(tank)
 
         if not self.bad_tanks:
             self.bullets.empty()
@@ -398,43 +413,46 @@ class Game:
     def _check_events(self):
         """响应按键和鼠标事件"""
         for event in pygame.event.get():
-            match event.type:
-                case pygame.QUIT:
-                    sys.exit()
-                case pygame.KEYDOWN:
-                    match event.key:
-                        case pygame.K_RIGHT:
-                            self.good_tank.moving_right = True
-                            self.dic = 'right'
-                        case pygame.K_LEFT:
-                            self.good_tank.moving_left = True
-                            self.dic = 'left'
-                        case pygame.K_UP:
-                            self.good_tank.moving_up = True
-                            self.dic = 'up'
-                        case pygame.K_DOWN:
-                            self.good_tank.moving_down = True
-                            self.dic = 'down'
-                        case pygame.K_SPACE:
-                            self._fire_bullet()
-                case pygame.KEYUP:
-                    match event.key:
-                        case pygame.K_RIGHT:
-                            self.good_tank.moving_right = False
+            if event.type == pygame.QUIT:
+                sys.exit()
 
-                        case pygame.K_LEFT:
-                            self.good_tank.moving_left = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    self.good_tank.moving_right = True
+                    self.dic = 'right'
+                elif event.key == pygame.K_LEFT:
+                    self.good_tank.moving_left = True
+                    self.dic = 'left'
+                elif event.key == pygame.K_UP:
+                    self.good_tank.moving_up = True
+                    self.dic = 'up'
+                elif event.key == pygame.K_DOWN:
+                    self.good_tank.moving_down = True
+                    self.dic = 'down'
+                elif event.key == pygame.K_SPACE:
+                    self._fire_bullet('yellow')
+                if event.key == pygame.K_TAB:
+                    self._fire_bullet('red')
 
-                        case pygame.K_UP:
-                            self.good_tank.moving_up = False
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_RIGHT:
+                    self.good_tank.moving_right = False
+                elif event.key == pygame.K_LEFT:
+                    self.good_tank.moving_left = False
+                elif event.key == pygame.K_UP:
+                    self.good_tank.moving_up = False
+                elif event.key == pygame.K_DOWN:
+                    self.good_tank.moving_down = False
 
-                        case pygame.K_DOWN:
-                            self.good_tank.moving_down = False
-
-    def _fire_bullet(self):
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
-        self.settings.shoot.play()
+    def _fire_bullet(self, pattern='yellow'):
+        if pattern == 'yellow':
+            new_bullet = Bullet1(self)
+            self.bullets.add(new_bullet)
+            self.settings.shoot.play()
+        elif pattern == 'red':
+            new_bullet = Bullet2(self)
+            self.bullets.add(new_bullet)
+            self.settings.shoot.play()
 
     def _update_screen(self):
         """更新屏幕上的图像，并切换到新屏幕"""
