@@ -392,19 +392,20 @@ class Game:
             self.sb.prep_score()
             for bad_tank_list in collisions.values():
                 for tank in bad_tank_list:
-                    if isinstance(tank, BadTank1):
-                        tank.blood -= self.settings.self.yellow_shoot_damage
-                        self.sb.score += self.settings.every_shoot_score_1
-                    elif isinstance(tank, BadTank2):
-                        tank.blood -= self.settings.self.red_shoot_damage
-                        self.sb.score += self.settings.every_shoot_score_2
+                    if isinstance(tank, (BadTank1, BadTank2)):
+                        if isinstance(tank, BadTank1):
+                            tank.blood -= self.settings.yellow_shoot_damage
+                            self.sb.score += self.settings.every_shoot_score_1
+                        elif isinstance(tank, BadTank2):
+                            tank.blood -= self.settings.self.red_shoot_damage
+                            self.sb.score += self.settings.every_shoot_score_2
 
-                    # 检查血量
-                    if tank.blood <= 0:
-                        self.settings.blast.play()
-                        explosion = Explosion(self, tank.rect.center)
-                        self.bad_tanks.add(explosion)
-                        self.bad_tanks.remove(tank)
+                        # 检查血量
+                        if tank.blood <= 0:
+                            self.settings.blast.play()
+                            explosion = Explosion(self, tank.rect.center)
+                            self.bad_tanks.add(explosion)
+                            self.bad_tanks.remove(tank)
 
         if not self.bad_tanks:
             self.bullets.empty()
