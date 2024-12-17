@@ -33,6 +33,7 @@ class Settings:
         self.every_shoot_score_2 = 20
         self.yellow_shoot_damage = 1
         self.red_shoot_damage = 2
+        self.red_bullets_allowed = 2
         self.blood_color = (128, 0, 128)
         self.blood_image = pygame.image.load('image/blood.png')
         self.bullet_image = pygame.image.load('image/bullet1.png')
@@ -417,34 +418,40 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
-
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
+                if event.key == pygame.K_d:
                     self.good_tank.moving_right = True
                     self.dic = 'right'
-                elif event.key == pygame.K_LEFT:
+                elif event.key == pygame.K_a:
                     self.good_tank.moving_left = True
                     self.dic = 'left'
-                elif event.key == pygame.K_UP:
+                elif event.key == pygame.K_w:
                     self.good_tank.moving_up = True
                     self.dic = 'up'
-                elif event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_s:  # 修正此处为 pygame.K_s
                     self.good_tank.moving_down = True
                     self.dic = 'down'
-                elif event.key == pygame.K_SPACE:
-                    self._fire_bullet('yellow')
-                if event.key == pygame.K_TAB:
-                    self._fire_bullet('red')
-
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_RIGHT:
+            elif event.type == pygame.KEYUP:  # 添加按键释放事件处理
+                if event.key == pygame.K_d:
                     self.good_tank.moving_right = False
-                elif event.key == pygame.K_LEFT:
+                elif event.key == pygame.K_a:
                     self.good_tank.moving_left = False
-                elif event.key == pygame.K_UP:
+                elif event.key == pygame.K_w:
                     self.good_tank.moving_up = False
-                elif event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_s:
                     self.good_tank.moving_down = False
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # 鼠标左键按下
+                    self.mouse_left_pressed_time = pygame.time.get_ticks()
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:  # 鼠标左键释放
+                    press_duration = pygame.time.get_ticks() - self.mouse_left_pressed_time
+                    if press_duration < 500:  # 如果按下时间小于500毫秒，发射黄色子弹
+                        self._fire_bullet('yellow')
+                    else:  # 否则发射红色子弹
+                        self._fire_bullet('red')
 
     def _fire_bullet(self, pattern='yellow'):
         if pattern == 'yellow':
@@ -452,9 +459,10 @@ class Game:
             self.bullets.add(new_bullet)
             self.settings.shoot.play()
         elif pattern == 'red':
-            new_bullet = Bullet2(self)
-            self.bullets.add(new_bullet)
-            self.settings.shoot.play()
+            if len(self.bullets) < self.settings.red_bullets_allowed:
+                new_bullet = Bullet2(self)
+                self.bullets.add(new_bullet)
+                self.settings.shoot.play()
 
     def _update_screen(self):
         """更新屏幕上的图像，并切换到新屏幕"""
