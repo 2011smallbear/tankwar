@@ -14,12 +14,14 @@ class Settings:
     """存储游戏所有设置的类"""
 
     def __init__(self):
-        self.screen_width = 900
-        self.screen_height = 900
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen_width = self.screen.get_rect().width
+        self.screen_height = self.screen.get_rect().height
         self.bg_color = (0, 0, 0)
-        self.tank_speed = 1.2
+        self.font_color = (255, 255, 255)
+        self.tank_speed = 2.0
         self.bad_tank_speed = self.tank_speed / 2
-        self.bullet_speed = 2.0
+        self.bullet_speed = 3.0
         self.bullet_width = 7
         self.bullet_height = 7
         self.bullet_color = (128, 128, 128)
@@ -338,6 +340,67 @@ class Game:
                     self.bullets.remove(bullet)
             self._update_screen()
 
+    def _check_events(self):
+        """响应按键和鼠标事件"""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_d:
+                    self.good_tank.moving_right = True
+                    self.dic = 'right'
+                elif event.key == pygame.K_a:
+                    self.good_tank.moving_left = True
+                    self.dic = 'left'
+                elif event.key == pygame.K_w:
+                    self.good_tank.moving_up = True
+                    self.dic = 'up'
+                elif event.key == pygame.K_s:
+                    self.good_tank.moving_down = True
+                    self.dic = 'down'
+                elif event.key == pygame.K_q:
+                    self._show_exit_prompt()
+            elif event.type == pygame.KEYUP:  # 添加按键释放事件处理
+                if event.key == pygame.K_d:
+                    self.good_tank.moving_right = False
+                elif event.key == pygame.K_a:
+                    self.good_tank.moving_left = False
+                elif event.key == pygame.K_w:
+                    self.good_tank.moving_up = False
+                elif event.key == pygame.K_s:
+                    self.good_tank.moving_down = False
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # 鼠标左键按下
+                    self.mouse_left_pressed_time = pygame.time.get_ticks()
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:  # 鼠标左键释放
+                    press_duration = pygame.time.get_ticks() - self.mouse_left_pressed_time
+                    if press_duration < 400:  # 如果按下时间小于500毫秒，发射黄色子弹
+                        self._fire_bullet('yellow')
+                    else:  # 否则发射红色子弹
+                        self._fire_bullet('red')
+
+    def _show_exit_prompt(self):
+        """显示退出提示并等待用户响应"""
+        font = pygame.font.SysFont(None, 48)
+        prompt_text = font.render("QUIT(y/n)", True, (255, 255, 255), self.settings.bg_color)
+        prompt_rect = prompt_text.get_rect(center=(self.settings.screen_width / 2, self.settings.screen_height / 2))
+
+        self.screen.blit(prompt_text, prompt_rect)
+        pygame.display.flip()
+
+        waiting_for_input = True
+        while waiting_for_input:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_y:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.key == pygame.K_n:
+                        waiting_for_input = False
+
     def _check_collision(self):
         """检查好坦克与坏坦克的碰撞"""
         if pygame.sprite.spritecollideany(self.good_tank, self.bad_tanks):
@@ -412,46 +475,6 @@ class Game:
         if not self.bad_tanks:
             self.bullets.empty()
             self._create_fleet()
-
-    def _check_events(self):
-        """响应按键和鼠标事件"""
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_d:
-                    self.good_tank.moving_right = True
-                    self.dic = 'right'
-                elif event.key == pygame.K_a:
-                    self.good_tank.moving_left = True
-                    self.dic = 'left'
-                elif event.key == pygame.K_w:
-                    self.good_tank.moving_up = True
-                    self.dic = 'up'
-                elif event.key == pygame.K_s:  # 修正此处为 pygame.K_s
-                    self.good_tank.moving_down = True
-                    self.dic = 'down'
-            elif event.type == pygame.KEYUP:  # 添加按键释放事件处理
-                if event.key == pygame.K_d:
-                    self.good_tank.moving_right = False
-                elif event.key == pygame.K_a:
-                    self.good_tank.moving_left = False
-                elif event.key == pygame.K_w:
-                    self.good_tank.moving_up = False
-                elif event.key == pygame.K_s:
-                    self.good_tank.moving_down = False
-
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # 鼠标左键按下
-                    self.mouse_left_pressed_time = pygame.time.get_ticks()
-
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 1:  # 鼠标左键释放
-                    press_duration = pygame.time.get_ticks() - self.mouse_left_pressed_time
-                    if press_duration < 500:  # 如果按下时间小于500毫秒，发射黄色子弹
-                        self._fire_bullet('yellow')
-                    else:  # 否则发射红色子弹
-                        self._fire_bullet('red')
 
     def _fire_bullet(self, pattern='yellow'):
         if pattern == 'yellow':
