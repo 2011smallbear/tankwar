@@ -39,6 +39,12 @@ class Settings:
         self.blood_color = (128, 0, 128)
         self.blood_image = pygame.image.load('image/blood.png')
         self.bullet_image = pygame.image.load('image/bullet1.png')
+        self.dead_image = pygame.image.load('image/dead.png')
+        self.exit_image = pygame.image.load('image/exit.png')
+        self.button_1_image = pygame.image.load('image/button1.png')
+        self.button_2_image = pygame.image.load('image/button2.png')
+        self.button_3_image = pygame.image.load('image/button3.png')
+        self.bg_image = pygame.image.load('image/refit_back_ground.png')
         self.blast = pygame.mixer.Sound('music/爆炸.mp3')
         self.shoot = pygame.mixer.Sound('music/射击.mp3')
         self.strike = pygame.mixer.Sound('music/撞击.mp3')
@@ -125,7 +131,17 @@ class Bullet1(Sprite):
         self.image = pygame.image.load('image/bullet1.png')  # 加载子弹图片
         self.rect = self.image.get_rect()  # 初始化rect属性
         self.color = 'yellow'
-        self.rect.midtop = game.good_tank.rect.midtop  # 设置子弹初始位置
+
+        # 根据坦克的方向设置子弹的初始位置
+        if game.dic == 'up':
+            self.rect.midbottom = game.good_tank.rect.midtop
+        elif game.dic == 'down':
+            self.rect.midtop = game.good_tank.rect.midbottom
+        elif game.dic == 'right':
+            self.rect.midleft = game.good_tank.rect.midright
+        elif game.dic == 'left':
+            self.rect.midright = game.good_tank.rect.midleft
+
         self.y = float(self.rect.y)
         self.x = float(self.rect.x)
         # 方向标识
@@ -326,9 +342,53 @@ class Game:
 
     def run_game(self):
 
-        self._exercise()
+        self._refit_mode()
 
-    def _exercise(self):
+    def _refit_mode(self):
+        print(self.settings.bg_image)
+        for bullet in self.bullets.copy():
+            bullet.kill()
+        for bad_tank in self.bad_tanks.copy():
+            bad_tank.kill()
+        background = self.settings.bg_image
+        self.screen.blit(background, (0, 0))
+        # 加载按钮图片
+        button1_image = self.settings.button_1_image
+        button2_image = self.settings.button_2_image
+
+        # 获取按钮的矩形区域，并设置它们的位置
+        button1_rect = button1_image.get_rect()
+        button1_rect.topleft = (50, 50)  # 设置按钮1的位置
+        button2_rect = button2_image.get_rect()
+        button2_rect.topright = (self.settings.screen_width - 50, 50)  # 设置按钮2的位置
+        button3_rect = self.settings.button_3_image.get_rect()
+        button3_rect.bottomleft = (50, self.settings.screen_height - 50)
+
+        # 在屏幕上绘制按钮
+        self.screen.blit(button1_image, button1_rect)
+        self.screen.blit(button2_image, button2_rect)
+        self.screen.blit(self.settings.button_3_image, button3_rect)
+
+        pygame.display.flip()
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        self._show_exit_prompt()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # 鼠标左键按下
+                        self.mouse_left_pressed_time = pygame.time.get_ticks()
+                        mouse_pos = event.pos
+                        if button1_rect.collidepoint(mouse_pos):
+                            self._exercise_mode()
+                        elif button2_rect.collidepoint(mouse_pos):
+                            print("Button 2 clicked")  # 替换为按钮2点击后的逻辑
+                        if button3_rect.collidepoint(mouse_pos):
+                            pygame.quit()
+                            sys.exit()
+
+    def _exercise_mode(self):
         while True:
             self._check_collision()
             self._check_events()
@@ -339,6 +399,7 @@ class Game:
                 if bullet.rect.bottom <= 0 or bullet.rect.right <= 0 or bullet.rect.left >= self.settings.screen_width:
                     self.bullets.remove(bullet)
             self._update_screen()
+
 
     def _check_events(self):
         """响应按键和鼠标事件"""
@@ -377,18 +438,16 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:  # 鼠标左键释放
                     press_duration = pygame.time.get_ticks() - self.mouse_left_pressed_time
-                    if press_duration < 400:  # 如果按下时间小于500毫秒，发射黄色子弹
+                    if press_duration < 200:  # 如果按下时间小于500毫秒，发射黄色子弹
                         self._fire_bullet('yellow')
                     else:  # 否则发射红色子弹
                         self._fire_bullet('red')
 
     def _show_exit_prompt(self):
         """显示退出提示并等待用户响应"""
-        font = pygame.font.SysFont(None, 48)
-        prompt_text = font.render("QUIT(y/n)", True, (255, 255, 255), self.settings.bg_color)
-        prompt_rect = prompt_text.get_rect(center=(self.settings.screen_width / 2, self.settings.screen_height / 2))
-
-        self.screen.blit(prompt_text, prompt_rect)
+        exit_rect = self.settings.exit_image.get_rect()
+        exit_rect.center = self.screen.get_rect().center
+        self.screen.blit(self.settings.exit_image, exit_rect)
         pygame.display.flip()
 
         waiting_for_input = True
@@ -396,8 +455,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_y:
-                        pygame.quit()
-                        sys.exit()
+                        self._refit_mode()
                     elif event.key == pygame.K_n:
                         waiting_for_input = False
 
@@ -420,8 +478,23 @@ class Game:
 
     def _one_game_over(self):
         """ 单次游戏结束"""
-        pygame.quit()
-        sys.exit()
+        for bullet in self.bullets.copy():
+            bullet.kill()
+        for bad_tank in self.bad_tanks.copy():
+            bad_tank.kill()
+        dead_rect = self.settings.dead_image.get_rect()
+        dead_rect.center = self.screen.get_rect().center
+        self.screen.blit(self.settings.dead_image, dead_rect)
+        pygame.display.flip()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_y:
+                        self._exercise()
+                    elif event.key == pygame.K_n:
+                        self._refit_mode()
+
+
 
     def _update_bad_tanks(self):
         """更新坏坦克的位置"""
