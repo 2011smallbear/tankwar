@@ -207,25 +207,25 @@ class BadTank1(Sprite):
         current_time = pygame.time.get_ticks()
         if current_time - self.last_move_time > 1000:  # 检查当前时间与last_move_time的差值是否大于1000毫秒
             if self.dic == 'up':
-                if self.rect.top > 0:  # 检查是否超出上边界
+                if self.rect.top > 60:  # 检查是否超出上边界
                     self.y -= self.tank_speed * 100
                     self.image = pygame.image.load('image\\turn0bad.png')
                 else:
                     self.random_move()  # 碰到边缘时随机改变方向
             elif self.dic == 'down':
-                if self.rect.bottom < self.screen_rect.bottom:  # 检查是否超出下边界
+                if self.rect.bottom < self.screen_rect.bottom - 60:  # 检查是否超出下边界
                     self.y += self.tank_speed * 100
                     self.image = pygame.image.load('image\\turn180bad.png')
                 else:
                     self.random_move()
             elif self.dic == 'right':
-                if self.rect.right < self.screen_rect.right:  # 检查是否超出右边界
+                if self.rect.right < self.screen_rect.right - 60:  # 检查是否超出右边界
                     self.x += self.tank_speed * 100
                     self.image = pygame.image.load('image\\turn90bad.png')
                 else:
                     self.random_move()
             elif self.dic == 'left':
-                if self.rect.left > 0:  # 检查是否超出左边界
+                if self.rect.left > 60:  # 检查是否超出左边界
                     self.x -= self.tank_speed * 100
                     self.image = pygame.image.load('image\\turn270bad.png')
                 else:
@@ -345,7 +345,6 @@ class Game:
         self._refit_mode()
 
     def _refit_mode(self):
-        print(self.settings.bg_image)
         for bullet in self.bullets.copy():
             bullet.kill()
         for bad_tank in self.bad_tanks.copy():
@@ -375,7 +374,8 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
-                        self._show_exit_prompt()
+                        pygame.quit()
+                        sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # 鼠标左键按下
                         self.mouse_left_pressed_time = pygame.time.get_ticks()
