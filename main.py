@@ -3,7 +3,6 @@ import sys
 import time
 
 import pygame
-import pygame.font
 from pygame.sprite import Sprite
 
 __author__ = 'XSY'
@@ -44,10 +43,15 @@ class Settings:
         self.button_1_image = pygame.image.load('image/button1.png')
         self.button_2_image = pygame.image.load('image/button2.png')
         self.button_3_image = pygame.image.load('image/button3.png')
+        self.button_4_image = pygame.image.load('image/button4.png')
         self.bg_image = pygame.image.load('image/refit_back_ground.png')
         self.blast = pygame.mixer.Sound('music/爆炸.mp3')
         self.shoot = pygame.mixer.Sound('music/射击.mp3')
         self.strike = pygame.mixer.Sound('music/撞击.mp3')
+        self.help_text_title = '你好，玩家！'
+        self.help_text = ['1.在任何时候按下Q键以退出游戏/回到主界面。',
+         '2.对战中，使用WASD 键位移动，使用鼠标左键单击射击。',
+         '3.短按左键为普通子弹，长按为强力子弹。']
 
 
 class BloodDisplay:
@@ -362,11 +366,14 @@ class Game:
         button2_rect.topright = (self.settings.screen_width - 50, 50)  # 设置按钮2的位置
         button3_rect = self.settings.button_3_image.get_rect()
         button3_rect.bottomleft = (50, self.settings.screen_height - 50)
+        button4_rect = self.settings.button_4_image.get_rect()
+        button4_rect.bottomright = (self.settings.screen_width - 50, self.settings.screen_height - 50)
 
         # 在屏幕上绘制按钮
         self.screen.blit(button1_image, button1_rect)
         self.screen.blit(button2_image, button2_rect)
         self.screen.blit(self.settings.button_3_image, button3_rect)
+        self.screen.blit(self.settings.button_4_image, button4_rect)
 
         pygame.display.flip()
 
@@ -383,11 +390,12 @@ class Game:
                         if button1_rect.collidepoint(mouse_pos):
                             self._exercise_mode()
                         elif button2_rect.collidepoint(mouse_pos):
-                            print("Button 2 clicked")  # 替换为按钮2点击后的逻辑
-                        if button3_rect.collidepoint(mouse_pos):
+                            pass  # 替换为按钮2点击后的逻辑
+                        elif button3_rect.collidepoint(mouse_pos):
                             pygame.quit()
                             sys.exit()
-
+                        elif button4_rect.collidepoint(mouse_pos):
+                            self._help_mode()
     def _exercise_mode(self):
         while True:
             self._check_collision()
@@ -401,6 +409,32 @@ class Game:
             self._update_screen()
 
 
+    def _help_mode(self):
+        background = self.settings.bg_image
+        self.screen.blit(background, (0, 0))
+        font = pygame.font.Font('other/字体.ttf', 50)  
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        self._show_exit_prompt()
+                if event.type == pygame.QUIT:
+                    running = False
+            title_text = font.render(self.settings.help_text_title, True, self.settings.text_color)
+            text_rect = title_text.get_rect()
+            text_rect.midtop = (self.settings.screen_width / 2, 10)
+            self.screen.blit(title_text, text_rect)
+            a = 0
+            for text in self.settings.help_text:
+                a += 1
+                text_text = font.render(text, True, self.settings.text_color)
+                text_rect = text_text.get_rect()
+                text_rect.midtop = (self.settings.screen_width / 2, 10 + a*40)
+                self.screen.blit(text_text, text_rect)
+            pygame.display.flip()
+        
+                        
     def _check_events(self):
         """响应按键和鼠标事件"""
         for event in pygame.event.get():
