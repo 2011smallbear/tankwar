@@ -17,10 +17,14 @@ class Settings:
         self.screen_width = self.screen.get_rect().width
         self.screen_height = self.screen.get_rect().height
         self.bg_color = (0, 0, 0)
+        self.bg_color2 = (128, 128, 128)
+        self.word_interval = 45
         self.font_color = (255, 255, 255)
+        self.font_path = 'other/字体.ttf'
         self.tank_speed = 2.0
         self.bad_tank_speed = self.tank_speed / 2
         self.bullet_speed = 3.0
+        self.super_bullet_speed = 6.0
         self.bullet_width = 7
         self.bullet_height = 7
         self.bullet_color = (128, 128, 128)
@@ -34,10 +38,11 @@ class Settings:
         self.every_shoot_score_2 = 20
         self.yellow_shoot_damage = 1
         self.red_shoot_damage = 2
-        self.red_bullets_allowed = 2
         self.blood_color = (128, 0, 128)
         self.blood_image = pygame.image.load('image/blood.png')
         self.bullet_image = pygame.image.load('image/bullet1.png')
+        self.bullet2_image = pygame.image.load('image/bullet2#.png')
+        self.bullet3_image = pygame.image.load('image/bullet3#.png')
         self.dead_image = pygame.image.load('image/dead.png')
         self.exit_image = pygame.image.load('image/exit.png')
         self.button_1_image = pygame.image.load('image/button1.png')
@@ -50,8 +55,10 @@ class Settings:
         self.strike = pygame.mixer.Sound('music/撞击.mp3')
         self.help_text_title = '你好，玩家！'
         self.help_text = ['1.在任何时候按下Q键以退出游戏/回到主界面。',
-         '2.对战中，使用WASD 键位移动，使用鼠标左键单击射击。',
-         '3.短按左键为普通子弹，长按为强力子弹。']
+                          '2.对战中，使用WASD 键位移动，使用鼠标左键单击射击。',
+                          '3.主表左键长按发射强力子弹。',
+                          '3.按下CTRL键可以切换强力子弹。',
+                          '3.短按左键为普通子弹，长按为强力子弹。']
 
 
 class BloodDisplay:
@@ -136,7 +143,7 @@ class Bullet1(Sprite):
         self.rect = self.image.get_rect()  # 初始化rect属性
         self.color = 'yellow'
 
-        # 根据坦克的方向设置子弹的初始位置
+        # 根据坦克d的方向设置子弹的初始位置
         if game.dic == 'up':
             self.rect.midbottom = game.good_tank.rect.midtop
         elif game.dic == 'down':
@@ -178,6 +185,24 @@ class Bullet2(Bullet1):
         self.color = 'red'
 
 
+class Bullet3(Bullet1):
+    def __init__(self, game):
+        super(Bullet3, self).__init__(game)
+        self.image = pygame.image.load('image/bullet3.png')
+        self.rect = self.image.get_rect()
+        self.color = 'green'
+
+    def update(self):
+        if self.dic == 'up':
+            self.y -= self.settings.super_bullet_speed
+        elif self.dic == 'down':
+            self.y += self.settings.super_bullet_speed
+        elif self.dic == 'right':
+            self.x += self.settings.super_bullet_speed
+        elif self.dic == 'left':
+            self.x -= self.settings.super_bullet_speed
+        self.rect.y = self.y
+        self.rect.x = self.x
 class BadTank1(Sprite):
     """管理坏坦克的类"""
 
@@ -341,6 +366,7 @@ class Game:
         self.good_tank = GoodTank(self, self.settings)
         self.bad_tanks = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
+        self.chosen_bullet = "bullet3"
         self.blood_display = BloodDisplay(self)
         self._create_fleet()
 
@@ -390,12 +416,13 @@ class Game:
                         if button1_rect.collidepoint(mouse_pos):
                             self._exercise_mode()
                         elif button2_rect.collidepoint(mouse_pos):
-                            pass  # 替换为按钮2点击后的逻辑
+                            self._upgrade_mode()
                         elif button3_rect.collidepoint(mouse_pos):
                             pygame.quit()
                             sys.exit()
                         elif button4_rect.collidepoint(mouse_pos):
                             self._help_mode()
+
     def _exercise_mode(self):
         while True:
             self._check_collision()
@@ -408,11 +435,26 @@ class Game:
                     self.bullets.remove(bullet)
             self._update_screen()
 
+    def _upgrade_mode(self):
+        background = self.settings.bg_image
+        self.screen.blit(background, (0, 0))
+        font = pygame.font.Font(self.settings.font_path, 50)
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        self._show_exit_prompt()
+            title_text = font.render('装备区', True, self.settings.text_color)
+            text_rect = title_text.get_rect()
+            text_rect.topleft = (30, 30)
+            self.screen.blit(title_text, text_rect)
+            pygame.display.flip()
 
     def _help_mode(self):
         background = self.settings.bg_image
         self.screen.blit(background, (0, 0))
-        font = pygame.font.Font('other/字体.ttf', 50)  
+        font = pygame.font.Font(self.settings.font_path, 50)
         running = True
         while running:
             for event in pygame.event.get():
@@ -430,11 +472,10 @@ class Game:
                 a += 1
                 text_text = font.render(text, True, self.settings.text_color)
                 text_rect = text_text.get_rect()
-                text_rect.midtop = (self.settings.screen_width / 2, 10 + a*40)
+                text_rect.midtop = (self.settings.screen_width / 2, 10 + a * self.settings.word_interval)
                 self.screen.blit(text_text, text_rect)
             pygame.display.flip()
-        
-                        
+
     def _check_events(self):
         """响应按键和鼠标事件"""
         for event in pygame.event.get():
@@ -453,6 +494,8 @@ class Game:
                 elif event.key == pygame.K_s:
                     self.good_tank.moving_down = True
                     self.dic = 'down'
+                elif event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
+                    self._choose_things()
                 elif event.key == pygame.K_q:
                     self._show_exit_prompt()
             elif event.type == pygame.KEYUP:  # 添加按键释放事件处理
@@ -475,7 +518,45 @@ class Game:
                     if press_duration < 200:  # 如果按下时间小于500毫秒，发射黄色子弹
                         self._fire_bullet('yellow')
                     else:  # 否则发射红色子弹
-                        self._fire_bullet('red')
+                        if self.chosen_bullet == 'bullet2':
+                            self._fire_bullet('red')
+
+                        elif self.chosen_bullet == 'bullet3':
+                            self._fire_bullet('green')
+
+    def _choose_things(self):
+        # 显示文字
+        font = pygame.font.Font(self.settings.font_path, 36)
+        text = font.render("选择强力子弹的类型", True, self.settings.font_color)
+        self.screen.blit(self.settings.bg_image, (0, 0))
+        self.screen.blit(text, (20, 20))
+        # 加载子弹图片
+        bullet2_image = self.settings.bullet2_image
+        bullet3_image = self.settings.bullet3_image
+
+        # 获取子弹图片的矩形区域，并设置它们的位置
+        bullet2_rect = bullet2_image.get_rect()
+        bullet2_rect.topleft = (100, 100)  # 设置子弹2图片的位置
+        bullet3_rect = bullet3_image.get_rect()
+        bullet3_rect.topright = (self.settings.screen_width - 100, 100)  # 设置子弹3图片的位置
+
+        # 在屏幕上绘制子弹图片
+        self.screen.blit(bullet2_image, bullet2_rect)
+        self.screen.blit(bullet3_image, bullet3_rect)
+        pygame.display.flip()
+
+        # 等待玩家点击
+        waiting_for_click = True
+        while waiting_for_click:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = event.pos
+                    if bullet2_rect.collidepoint(mouse_pos):
+                        self.chosen_bullet = 'bullet2'
+                        waiting_for_click = False
+                    elif bullet3_rect.collidepoint(mouse_pos):
+                        self.chosen_bullet = 'bullet3'
+                        waiting_for_click = False
 
     def _show_exit_prompt(self):
         """显示退出提示并等待用户响应"""
@@ -528,8 +609,6 @@ class Game:
                     elif event.key == pygame.K_n:
                         self._refit_mode()
 
-
-
     def _update_bad_tanks(self):
         """更新坏坦克的位置"""
         for bad_tank in self.bad_tanks.sprites():
@@ -572,6 +651,10 @@ class Game:
                             tank.blood -= self.settings.red_shoot_damage
                             self.sb.score += self.settings.every_shoot_score_2
 
+                        elif bullet.color == 'green':
+                            tank.blood -= self.settings.yellow_shoot_damage
+                            self.sb.score += self.settings.every_shoot_score_1
+
                         # 检查血量
                         if tank.blood <= 0:
                             self.settings.blast.play()
@@ -589,10 +672,15 @@ class Game:
             self.bullets.add(new_bullet)
             self.settings.shoot.play()
         elif pattern == 'red':
-            if len(self.bullets) < self.settings.red_bullets_allowed:
-                new_bullet = Bullet2(self)
-                self.bullets.add(new_bullet)
-                self.settings.shoot.play()
+            new_bullet = Bullet2(self)
+            self.bullets.add(new_bullet)
+            self.settings.shoot.play()
+        elif pattern == 'green':
+            new_bullet = Bullet3(self)
+            self.bullets.add(new_bullet)
+            self.settings.shoot.play()
+
+
 
     def _update_screen(self):
         """更新屏幕上的图像，并切换到新屏幕"""
