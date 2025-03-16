@@ -1,3 +1,4 @@
+import math
 import random
 import sys
 import time
@@ -16,10 +17,159 @@ class Settings:
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.screen_width = self.screen.get_rect().width
         self.screen_height = self.screen.get_rect().height
-        self.bg_color = (0, 0, 0)
-        self.bg_color2 = (128, 128, 128)
+        self.color_dic = {
+            "白色": (255, 255, 255),
+            "黑色": (0, 0, 0),
+            "红色": (255, 0, 0),
+            "绿色": (0, 128, 0),
+            "蓝色": (0, 0, 255),
+            "青色": (0, 128, 128),
+            "紫色": (238, 130, 238),
+            "灰色": (128, 128, 128),
+            "黄色": (255, 255, 0),
+            "镉黄": (255, 153, 18),
+            "金黄": (255, 215, 0),
+            "肉黄": (255, 125, 64),
+            "粉黄": (255, 227, 132),
+            "香蕉黄": (227, 207, 87),
+            "白烟灰": (245, 245, 245),
+            "蛋壳灰": (252, 230, 202),
+            "黄绿色": (127, 255, 0),
+            "青绿色": (64, 224, 205),
+            "天蓝灰": (202, 235, 216),
+            "象牙灰": (251, 255, 242),
+            "亚麻灰": (250, 240, 230),
+            "杏仁灰": (255, 235, 205),
+            "贝壳灰": (255, 245, 238),
+            "棕褐色": (210, 180, 140),
+            "爱丽丝蓝": (240, 248, 255),
+            "古董白": (250, 235, 215),
+            "浅绿色": (175, 238, 238),
+            "海蓝色": (127, 255, 212),
+            "蔚蓝色": (240, 255, 255),
+            "米色": (245, 245, 220),
+            "橘黄色": (255, 228, 196),
+            "白杏仁": (255, 235, 205),
+            "蓝紫色": (138, 43, 226),
+            "棕色": (165, 42, 42),
+            "硬木色": (222, 184, 135),
+            "学员蓝": (95, 158, 160),
+            "淡黄绿色": (127, 255, 0),
+            "巧克力色": (210, 105, 30),
+            "珊瑚色": (255, 127, 80),
+            "矢车菊蓝": (100, 149, 237),
+            "玉米丝色": (255, 248, 220),
+            "深红": (220, 20, 60),
+            "深蓝色": (0, 0, 139),
+            "深青色": (0, 139, 139),
+            "暗金色": (184, 134, 11),
+            "深灰色": (169, 169, 169),
+            "深绿色": (0, 100, 0),
+            "深色卡其色": (189, 183, 107),
+            "深品红色": (139, 0, 139),
+            "深橄榄绿": (85, 107, 47),
+            "深橙色": (255, 140, 0),
+            "暗兰花": (153, 50, 204),
+            "深红色": (139, 0, 0),
+            "暗三文鱼": (233, 150, 122),
+            "深海绿": (143, 188, 143),
+            "深条纹蓝": (72, 61, 139),
+            "深色条纹灰色": (47, 79, 79),
+            "深绿松石": (0, 206, 209),
+            "深紫色": (148, 0, 211),
+            "深粉色": (255, 20, 147),
+            "深蓝": (0, 191, 255),
+            "暗灰色": (105, 105, 105),
+            "道奇蓝": (30, 144, 255),
+            "长石色": (209, 146, 117),
+            "火砖色": (178, 34, 34),
+            "花朵白色": (255, 250, 240),
+            "森林绿": (34, 139, 34),
+            "紫红色": (255, 0, 255),
+            "淡灰色": (220, 220, 220),
+            "幽灵白": (248, 248, 255),
+            "黄金": (255, 2, 150),
+            "鲜黄色": (218, 165, 32),
+            "绿黄色": (173, 255, 47),
+            "蜜露色": (240, 255, 240),
+            "粉红色": (255, 192, 203),
+            "印度红": (205, 92, 92),
+            "靛蓝": (75, 0, 130),
+            "象牙色": (255, 255, 240),
+            "卡其色": (240, 230, 140),
+            "薰衣草色": (230, 230, 250),
+            "淡紫色腮红": (255, 240, 245),
+            "草坪绿": (124, 252, 0),
+            "柠檬色": (255, 250, 205),
+            "淡蓝色": (173, 216, 230),
+            "淡珊瑚色": (240, 128, 128),
+            "淡青色": (224, 255, 255),
+            "亮金黄色": (250, 250, 210),
+            "浅灰色": (211, 211, 211),
+            "浅粉色": (255, 182, 193),
+            "浅鲑鱼肉色": (255, 160, 122),
+            "浅海洋绿": (32, 178, 170),
+            "淡天蓝色": (135, 206, 250),
+            "亮条纹蓝": (132, 112, 255),
+            "浅石板灰": (119, 136, 153),
+            "亮钢蓝": (176, 196, 222),
+            "浅黄色": (255, 255, 224),
+            "石灰": (0, 255, 0),
+            "柠檬绿": (50, 205, 50),
+            "亚麻色": (250, 240, 230),
+            "品红色": (255, 0, 255),
+            "栗色": (128, 0, 0),
+            "间绿色": (102, 205, 170),
+            "中等蓝色": (0, 0, 205),
+            "中兰花紫": (186, 85, 211),
+            "中等紫色": (147, 112, 216),
+            "中海洋绿": (60, 179, 113),
+            "中板岩蓝": (123, 104, 238),
+            "中等春绿色": (0, 250, 154),
+            "中等绿松石色": (72, 209, 204),
+            "中等琴红": (199, 21, 133),
+            "午夜蓝": (25, 25, 112),
+            "薄荷色": (245, 255, 250),
+            "薄雾玫瑰色": (255, 228, 225),
+            "莫卡辛色": (255, 228, 181),
+            "纳瓦霍白": (255, 222, 173),
+            "海军蓝": (0, 0, 128),
+            "旧蕾丝色": (253, 245, 230),
+            "橄榄色": (107, 142, 35),
+            "橙色": (255, 165, 0),
+            "橙红色": (255, 69, 0),
+            "兰花色": (218, 112, 214),
+            "淡菊黄色": (238, 232, 170),
+            "淡绿色": (152, 251, 152),
+            "淡紫罗兰红": (216, 112, 147),
+            "番木色": (255, 239, 213),
+            "桃色": (255, 218, 185),
+            "秘鲁褐": (205, 133, 63),
+            "梅花色": (221, 160, 221),
+            "粉末蓝": (176, 224, 230),
+            "玫瑰棕色": (188, 143, 143),
+            "皇家蓝": (65, 105, 225),
+            "马鞍棕色": (139, 69, 19),
+            "浅橙色": (250, 128, 114),
+            "沙棕色": (244, 164, 96),
+            "海绿色": (46, 139, 87),
+            "海贝色": (255, 245, 238),
+            "褐土色": (160, 82, 45),
+            "银色": (192, 192, 192),
+            "天蓝": (135, 206, 235),
+            "板条蓝": (106, 90, 205),
+            "板条灰色": (112, 128, 144),
+            "雪色": (255, 250, 250),
+            "春绿色": (0, 255, 127),
+            "钢蓝": (70, 130, 180),
+            "蓟花色": (216, 191, 216),
+            "番茄色": (255, 99, 71),
+            "绿松石色": (64, 224, 208),
+            "小提琴红": (208, 32, 144),
+            "小麦色": (245, 222, 179),
+            "白烟色": (245, 245, 245)
+        }
         self.word_interval = 45
-        self.font_color = (255, 255, 255)
         self.font_path = 'other/字体.ttf'
         self.tank_speed = 2.0
         self.bad_tank_speed = self.tank_speed / 2
@@ -28,8 +178,6 @@ class Settings:
         self.super_bullet_speed = 6.0
         self.bullet_width = 7
         self.bullet_height = 7
-        self.bullet_color = (128, 128, 128)
-        self.text_color = (255, 255, 255)
         self.default_direction = 'up'
         self.bad_tank_num = 6
         self.ship_left = 3
@@ -39,18 +187,18 @@ class Settings:
         self.every_shoot_score_2 = 20
         self.yellow_shoot_damage = 1
         self.red_shoot_damage = 2
-        self.blood_color = (128, 0, 128)
+        self.yellow_shoot_money = 3
+        self.red_shoot_money = 5
         self.blood_image = pygame.image.load('image/blood.png')
         self.bullet_image = pygame.image.load('image/bullet1.png')
         self.bullet2_image = pygame.image.load('image/bullet2#.png')
         self.bullet3_image = pygame.image.load('image/bullet3#.png')
-        self.dead_image = pygame.image.load('image/dead.png')
-        self.exit_image = pygame.image.load('image/exit.png')
         self.button_1_image = pygame.image.load('image/button1.png')
         self.button_2_image = pygame.image.load('image/button2.png')
         self.button_3_image = pygame.image.load('image/button3.png')
         self.button_4_image = pygame.image.load('image/button4.png')
-        self.bg_image = pygame.image.load('image/refit_back_ground.png')
+        self.bg_image = pygame.image.load('image/background.jpg')
+        self.start_image = pygame.image.load('image/startgame.jpg')
         self.blast = pygame.mixer.Sound('music/爆炸.mp3')
         self.shoot = pygame.mixer.Sound('music/射击.mp3')
         self.strike = pygame.mixer.Sound('music/撞击.mp3')
@@ -58,7 +206,7 @@ class Settings:
         self.help_text = ['1.在任何时候按下Q键以退出游戏/回到主界面。',
                           '2.对战中，使用WASD键位移动，使用鼠标左键单击射击。',
                           '3.鼠标左键长按发射强力子弹。',
-                          '3.按下CTRL键可以切换强力子弹。',
+                          '3.在对战时按下CTRL键可以切换强力子弹。',
                           '3.短按左键为普通子弹，长按为强力子弹。']
 
 
@@ -83,14 +231,13 @@ class ScoreBoard:
         self.settings = game.settings
         self.screen = game.screen
         self.sreen_rect = self.screen.get_rect()
-        self.text_color = self.settings.text_color
         self.score = 0
         self.font = pygame.font.SysFont(self.settings.font_path, 48)
         self.prep_score()
 
     def prep_score(self):
         self.score_str = str(self.score)
-        self.score_image = self.font.render(self.score_str, True, self.text_color, self.settings.bg_color)
+        self.score_image = self.font.render(self.score_str, True, self.settings.color_dic['白色'], self.settings.color_dic['黑色'])
         self.score_rect = self.score_image.get_rect()
         self.score_rect.right = self.sreen_rect.right - 20
         self.score_rect.top = 20
@@ -229,7 +376,7 @@ class BadTank1(Sprite):
         self.screen.blit(self.image, self.rect)
         # 绘制血条
         blood_bar_width = (self.blood / self.settings.bad_tank1_blood) * self.rect.width
-        pygame.draw.rect(self.screen, self.settings.blood_color, (self.rect.x, self.rect.y, blood_bar_width, 5))
+        pygame.draw.rect(self.screen, self.settings.color_dic['栗色'], (self.rect.x, self.rect.y, blood_bar_width, 5))
 
     def random_move(self):
         directions = ['up', 'down', 'left', 'right']
@@ -377,8 +524,48 @@ class Game:
         self._create_fleet()
 
     def run_game(self):
+        self._start_game()
 
-        self._refit_mode()
+    def _start_game(self):
+        start_image = self.settings.start_image
+        start_rect = start_image.get_rect()
+        start_rect.center = (self.settings.screen_width // 2, self.settings.screen_height // 2)
+
+        clock = pygame.time.Clock()
+        running = True
+
+        while running:
+            # 绘制前景元素
+            self.screen.blit(start_image, start_rect)
+
+            # 绘制提示文字
+            font = pygame.font.Font(self.settings.font_path, 36)
+            alpha = int(128 + 127 * math.sin(math.radians(pygame.time.get_ticks() / 5)))
+            text = font.render("按任意键开始", True, (255, max(50, alpha), max(50, alpha)))
+            text_rect = text.get_rect(center=(self.settings.screen_width // 2, self.settings.screen_height - 60))
+            self.screen.blit(text, text_rect)
+
+            # 添加随机噪点特效
+            for _ in range(30):  # 控制噪点数量
+                x = random.randint(0, self.settings.screen_width)
+                y = random.randint(0, self.settings.screen_height)
+                pygame.draw.circle(self.screen, (255, 0, 0), (x, y), 1)
+
+            pygame.display.flip()
+            clock.tick(60)  # 限制60帧
+
+            # 事件处理
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        pygame.quit()
+                        sys.exit()
+                    else:
+                        running = False  # 退出循环
+                        self._refit_mode()
 
     def _refit_mode(self):
         for bullet in self.bullets.copy():
@@ -449,21 +636,22 @@ class Game:
         font2 = pygame.font.Font(self.settings.font_path, 30)
         with open("other/data.txt", "r", encoding="utf-8") as f:
             content = f.read()
-        title_text = font1.render('装备区', True, self.settings.text_color)
+        title_text = font1.render('装备区', True, self.settings.color_dic['白色'])
         text_rect = title_text.get_rect()
         text_rect.topleft = (40, 40)
         self.screen.blit(title_text, text_rect)
         text2 = font2.render("温馨提示：装备只可以用于一次对战，对战结束后将自动清空武器~~", True,
-                             self.settings.font_color)
+                             self.settings.color_dic['白色'])
         self.screen.blit(text2, (
-            self.settings.screen_width / 2 - text2.get_width() / 2, self.settings.screen_height - text2.get_height() * 2))
-        bullet_text = font1.render(f"装载弹量限额：{self.settings.bullets_num}", True, self.settings.font_color)
+            self.settings.screen_width / 2 - text2.get_width() / 2,
+            self.settings.screen_height - text2.get_height() * 2))
+        bullet_text = font1.render(f"装载弹量限额：{self.settings.bullets_num}", True, self.settings.color_dic['白色'])
         bullet_rect = bullet_text.get_rect()
-        self.screen.blit(bullet_text, ((self.settings.screen_width - 400, 60)))
+        self.screen.blit(bullet_text, (self.settings.screen_width - 400, 60))
         text3 = font2.render("现在开始游戏！", True, (255, 0, 0))
         text3_rect = text3.get_rect()
         text3_rect.topleft = (self.settings.screen_width - 400, self.settings.screen_height - 60)
-        self.screen.blit(text3, ((self.settings.screen_width - 400, self.settings.screen_height - 60)))
+        self.screen.blit(text3, (self.settings.screen_width - 400, self.settings.screen_height - 60))
         bullet2_image = self.settings.bullet2_image
         bullet3_image = self.settings.bullet3_image
         bullet2_rect = bullet2_image.get_rect()
@@ -473,9 +661,9 @@ class Game:
         self.screen.blit(bullet2_image, bullet2_rect)
         self.screen.blit(bullet3_image, bullet3_rect)
 
-        text4 = font2.render(f"子弹2：{self.b2_num}", True, self.settings.font_color)
+        text4 = font2.render(f"子弹2：{self.b2_num}", True, self.settings.color_dic['白色'])
         self.screen.blit(text4, (bullet2_rect.left + 50, bullet2_rect.bottom + 50))
-        text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.font_color)
+        text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.color_dic['白色'])
         self.screen.blit(text5, (bullet3_rect.left + 50, bullet3_rect.bottom + 50))
         pygame.display.flip()
         running = True
@@ -492,27 +680,25 @@ class Game:
                         self.b2_num += 1
                         self.settings.bullets_num -= 1
                         # 使用背景色填充旧的文本区域
-                        pygame.draw.rect(self.screen, self.settings.bg_color, (
+                        pygame.draw.rect(self.screen, self.settings.color_dic['黑色'], (
                             bullet2_rect.left + 50, bullet2_rect.bottom + 50, text4.get_width(), text4.get_height()))
                         self.screen.blit(bullet2_image, bullet2_rect)
-                        text4 = font2.render(f"子弹2：{self.b2_num}", True, self.settings.font_color)
+                        text4 = font2.render(f"子弹2：{self.b2_num}", True, self.settings.color_dic['白色'])
                         self.screen.blit(text4, (bullet2_rect.left + 50, bullet2_rect.bottom + 50))
 
                     elif bullet3_rect.collidepoint(mouse_pos) and self.add_bullet:
                         self.b3_num += 1
                         self.settings.bullets_num -= 1
                         # 使用背景色填充旧的文本区域
-                        pygame.draw.rect(self.screen, self.settings.bg_color, (
+                        pygame.draw.rect(self.screen, self.settings.color_dic['黑色'], (
                             bullet3_rect.left + 50, bullet3_rect.bottom + 50, text5.get_width(), text5.get_height()))
                         self.screen.blit(bullet3_image, bullet3_rect)
-                        text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.font_color)
+                        text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.color_dic['白色'])
                         self.screen.blit(text5, (bullet3_rect.left + 50, bullet3_rect.bottom + 50))
 
                     elif text3_rect.collidepoint(mouse_pos):
                         self._exercise_mode()
                     pygame.display.flip()
-
-
 
         pygame.display.flip()
 
@@ -525,17 +711,17 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
-                        self._re
+                        self._refit_mode()
                 if event.type == pygame.QUIT:
                     running = False
-            title_text = font.render(self.settings.help_text_title, True, self.settings.text_color)
+            title_text = font.render(self.settings.help_text_title, True, self.settings.color_dic['白色'])
             text_rect = title_text.get_rect()
             text_rect.midtop = (self.settings.screen_width / 2, 10)
             self.screen.blit(title_text, text_rect)
             a = 0
             for text in self.settings.help_text:
                 a += 1
-                text_text = font.render(text, True, self.settings.text_color)
+                text_text = font.render(text, True, self.settings.color_dic['白色'])
                 text_rect = text_text.get_rect()
                 text_rect.midtop = (self.settings.screen_width / 2, 10 + a * self.settings.word_interval)
                 self.screen.blit(text_text, text_rect)
@@ -594,7 +780,7 @@ class Game:
     def _choose_things(self):
         # 显示文字
         font = pygame.font.Font(self.settings.font_path, 36)
-        text = font.render("选择强力子弹的类型，鼠标左键长按使用", True, self.settings.font_color)
+        text = font.render("选择强力子弹的类型，鼠标左键长按使用", True, self.settings.color_dic['白色'])
         self.screen.blit(self.settings.bg_image, (0, 0))
         self.screen.blit(text, (20, 20))
         # 加载子弹图片
@@ -628,7 +814,7 @@ class Game:
     def _show_exit_prompt(self, text="退出并保存 (Y/N)"):
         """显示退出提示并等待用户响应"""
         font = pygame.font.Font(self.settings.font_path, 80)
-        text = font.render(text, True, self.settings.font_color)
+        text = font.render(text, True, self.settings.color_dic['白色'])
         self.screen.blit(text, (self.settings.screen_width / 2 - text.get_width() / 2, self.settings.screen_height / 2))
         pygame.display.flip()
         waiting_for_input = True
@@ -641,7 +827,6 @@ class Game:
                             if file_content == '':
                                 file_content = '0'
                             f.write(str(int(file_content) + int(self.sb.score)))
-                        self.sb.score = 0
                         self._refit_mode()
                     elif event.key == pygame.K_n:
                         waiting_for_input = False
@@ -671,7 +856,7 @@ class Game:
             bad_tank.kill()
         pygame.display.flip()
         font = pygame.font.Font(self.settings.font_path, 80)
-        text = font.render("您已死亡，即将退回主界面", True, self.settings.font_color)
+        text = font.render("您已死亡，即将退回主界面", True, self.settings.color_dic['白色'])
         self.screen.blit(text, (self.settings.screen_width / 2 - text.get_width() / 2, self.settings.screen_height / 2))
         with open('other/data.txt', 'w+') as f:
             file_content = f.read()
@@ -755,7 +940,7 @@ class Game:
             self.settings.shoot.play()
         elif self.b2_num < 0 or self.b3_num < 0:
             font = pygame.font.Font(self.settings.font_path, 80)
-            text = font.render('该型号子弹已空 (Y)', True, self.settings.font_color)
+            text = font.render('该型号子弹已空 (Y)', True, self.settings.color_dic['白色'])
             self.screen.blit(text,
                              (self.settings.screen_width / 2 - text.get_width() / 2, self.settings.screen_height / 2))
             pygame.display.flip()
@@ -766,11 +951,9 @@ class Game:
                         if event.key == pygame.K_y:
                             waiting_for_input = False
 
-
-
     def _update_screen(self):
         """更新屏幕上的图像，并切换到新屏幕"""
-        self.screen.fill(self.settings.bg_color)
+        self.screen.fill(self.settings.color_dic['黑色'])
         self.good_tank.blitme()  # 在屏幕上绘制好坦克
         for bullet in self.bullets.sprites():
             bullet.draw()
