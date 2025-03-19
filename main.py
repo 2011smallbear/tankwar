@@ -171,11 +171,11 @@ class Settings:
         }
         self.word_interval = 45
         self.font_path = 'other/字体.ttf'
-        self.tank_speed = 2.0
+        self.tank_speed = 4.0
         self.bad_tank_speed = self.tank_speed / 2
-        self.bullet_speed = 3.0
+        self.bullet_speed = 6.0
         self.bullets_num = 50
-        self.super_bullet_speed = 6.0
+        self.super_bullet_speed = 8.0
         self.bullet_width = 7
         self.bullet_height = 7
         self.default_direction = 'up'
@@ -193,7 +193,6 @@ class Settings:
         self.bullet_image = pygame.image.load('image/bullet1.png')
         self.bullet2_image = pygame.image.load('image/bullet2#.png')
         self.bullet3_image = pygame.image.load('image/bullet3#.png')
-        self.button_1_image = pygame.image.load('image/button1.png')
         self.button_2_image = pygame.image.load('image/button2.png')
         self.button_3_image = pygame.image.load('image/button3.png')
         self.button_4_image = pygame.image.load('image/button4.png')
@@ -237,7 +236,8 @@ class ScoreBoard:
 
     def prep_score(self):
         self.score_str = str(self.score)
-        self.score_image = self.font.render(self.score_str, True, self.settings.color_dic['白色'], self.settings.color_dic['黑色'])
+        self.score_image = self.font.render(self.score_str, True, self.settings.color_dic['白色'],
+                                            self.settings.color_dic['黑色'])
         self.score_rect = self.score_image.get_rect()
         self.score_rect.right = self.sreen_rect.right - 20
         self.score_rect.top = 20
@@ -459,7 +459,7 @@ class BadTank2(BadTank1):
 class GoodTank:
     """管理好坦克的类"""
 
-    def __init__(self, game, settings):
+    def __init__(self, game, settigns):
         self.screen = game.screen
         self.settings = game.settings
         self.screen_rect = self.screen.get_rect()
@@ -540,10 +540,15 @@ class Game:
 
             # 绘制提示文字
             font = pygame.font.Font(self.settings.font_path, 36)
+            font2 = pygame.font.Font(self.settings.font_path, 100)
             alpha = int(128 + 127 * math.sin(math.radians(pygame.time.get_ticks() / 5)))
             text = font.render("按任意键开始", True, (255, max(50, alpha), max(50, alpha)))
             text_rect = text.get_rect(center=(self.settings.screen_width // 2, self.settings.screen_height - 60))
+            alpha = int(128 + 127 * math.sin(math.radians(pygame.time.get_ticks() / 5)))
+            text2 = font2.render("迷离世界", True, (255, max(50, alpha), max(50, alpha)))
+            text_rect2 = text2.get_rect(center=(self.settings.screen_width // 2, 60))
             self.screen.blit(text, text_rect)
+            self.screen.blit(text2, text_rect2)
 
             # 添加随机噪点特效
             for _ in range(30):  # 控制噪点数量
@@ -575,23 +580,16 @@ class Game:
         background = self.settings.bg_image
         self.screen.blit(background, (0, 0))
         # 加载按钮图片
-        button1_image = self.settings.button_1_image
         button2_image = self.settings.button_2_image
 
         # 获取按钮的矩形区域，并设置它们的位置
-        button1_rect = button1_image.get_rect()
-        button1_rect.topleft = (50, 50)  # 设置按钮1的位置
         button2_rect = button2_image.get_rect()
         button2_rect.topright = (self.settings.screen_width - 50, 50)  # 设置按钮2的位置
-        button3_rect = self.settings.button_3_image.get_rect()
-        button3_rect.bottomleft = (50, self.settings.screen_height - 50)
         button4_rect = self.settings.button_4_image.get_rect()
         button4_rect.bottomright = (self.settings.screen_width - 50, self.settings.screen_height - 50)
 
         # 在屏幕上绘制按钮
-        self.screen.blit(button1_image, button1_rect)
         self.screen.blit(button2_image, button2_rect)
-        self.screen.blit(self.settings.button_3_image, button3_rect)
         self.screen.blit(self.settings.button_4_image, button4_rect)
 
         pygame.display.flip()
@@ -606,13 +604,8 @@ class Game:
                     if event.button == 1:  # 鼠标左键按下
                         self.mouse_left_pressed_time = pygame.time.get_ticks()
                         mouse_pos = event.pos
-                        if button1_rect.collidepoint(mouse_pos):
-                            self._exercise_mode()
-                        elif button2_rect.collidepoint(mouse_pos):
+                        if button2_rect.collidepoint(mouse_pos):
                             self._upgrade_mode()
-                        elif button3_rect.collidepoint(mouse_pos):
-                            pygame.quit()
-                            sys.exit()
                         elif button4_rect.collidepoint(mouse_pos):
                             self._help_mode()
 
@@ -630,53 +623,63 @@ class Game:
             self._update_screen()
 
     def _upgrade_mode(self):
-        background = self.settings.bg_image
-        self.screen.blit(background, (0, 0))
-        font1 = pygame.font.Font(self.settings.font_path, 50)
-        font2 = pygame.font.Font(self.settings.font_path, 30)
-        with open("other/data.txt", "r", encoding="utf-8") as f:
-            content = f.read()
-        title_text = font1.render('装备区', True, self.settings.color_dic['白色'])
-        text_rect = title_text.get_rect()
-        text_rect.topleft = (40, 40)
-        self.screen.blit(title_text, text_rect)
-        text2 = font2.render("温馨提示：装备只可以用于一次对战，对战结束后将自动清空武器~~", True,
-                             self.settings.color_dic['白色'])
-        self.screen.blit(text2, (
-            self.settings.screen_width / 2 - text2.get_width() / 2,
-            self.settings.screen_height - text2.get_height() * 2))
-        bullet_text = font1.render(f"装载弹量限额：{self.settings.bullets_num}", True, self.settings.color_dic['白色'])
-        bullet_rect = bullet_text.get_rect()
-        self.screen.blit(bullet_text, (self.settings.screen_width - 400, 60))
-        text3 = font2.render("现在开始游戏！", True, (255, 0, 0))
-        text3_rect = text3.get_rect()
-        text3_rect.topleft = (self.settings.screen_width - 400, self.settings.screen_height - 60)
-        self.screen.blit(text3, (self.settings.screen_width - 400, self.settings.screen_height - 60))
-        bullet2_image = self.settings.bullet2_image
-        bullet3_image = self.settings.bullet3_image
-        bullet2_rect = bullet2_image.get_rect()
-        bullet2_rect.topleft = (100, 100)
-        bullet3_rect = bullet3_image.get_rect()
-        bullet3_rect.topright = (self.settings.screen_width - 100, 100)
-        self.screen.blit(bullet2_image, bullet2_rect)
-        self.screen.blit(bullet3_image, bullet3_rect)
-
-        text4 = font2.render(f"子弹2：{self.b2_num}", True, self.settings.color_dic['白色'])
-        self.screen.blit(text4, (bullet2_rect.left + 50, bullet2_rect.bottom + 50))
-        text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.color_dic['白色'])
-        self.screen.blit(text5, (bullet3_rect.left + 50, bullet3_rect.bottom + 50))
-        pygame.display.flip()
         running = True
         while running:
+            # 每次循环重新计算beta
+            beta = int(128 + 127 * math.sin(math.radians(pygame.time.get_ticks() / 10)))  # 调整除数
+            text_color = (255, beta, beta)  # 直接使用beta
+
+            # 绘制背景
+            self.screen.blit(self.settings.bg_image, (0, 0))
+            font0 = pygame.font.Font(self.settings.font_path, 70)
+            font1 = pygame.font.Font(self.settings.font_path, 50)
+            font2 = pygame.font.Font(self.settings.font_path, 30)
+            with open("other/data.txt", "r", encoding="utf-8") as f:
+                content = f.read()
+            title_text = font1.render('装备区', True, self.settings.color_dic['白色'])
+            text_rect = title_text.get_rect()
+            text_rect.topleft = (40, 40)
+            self.screen.blit(title_text, text_rect)
+            text2 = font2.render("温馨提示：装备只可以用于一次对战，对战结束后将自动清空武器~~", True,
+                                 self.settings.color_dic['白色'])
+            self.screen.blit(text2, (
+                self.settings.screen_width / 2 - text2.get_width() / 2,
+                self.settings.screen_height - text2.get_height() * 2))
+            bullet_text = font1.render(f"装载弹量限额：{self.settings.bullets_num}", True,
+                                       self.settings.color_dic['白色'])
+            bullet_rect = bullet_text.get_rect()
+            self.screen.blit(bullet_text, (self.settings.screen_width - 400, 60))
+            beta = int(128 + 127 * math.sin(math.radians(pygame.time.get_ticks() / 5)))
+            text3 = font0.render("现在开始游戏！", True, text_color)  # 使用动态颜色
+            text3_rect = text3.get_rect()
+            text3_rect.topleft = (self.settings.screen_width - 430, self.settings.screen_height - 60)
+            self.screen.blit(text3, (self.settings.screen_width - 450, self.settings.screen_height - 60))
+            self.screen.blit(text3, (self.settings.screen_width - 450, self.settings.screen_height - 60))
+            bullet2_image = self.settings.bullet2_image
+            bullet3_image = self.settings.bullet3_image
+            bullet2_rect = bullet2_image.get_rect()
+            bullet2_rect.topleft = (100, 100)
+            bullet3_rect = bullet3_image.get_rect()
+            bullet3_rect.topright = (self.settings.screen_width - 100, 100)
+            self.screen.blit(bullet2_image, bullet2_rect)
+            self.screen.blit(bullet3_image, bullet3_rect)
+
+            text4 = font2.render(f"子弹2：{self.b2_num}", True, self.settings.color_dic['白色'])
+            self.screen.blit(text4, (bullet2_rect.left + 50, bullet2_rect.bottom + 50))
+            text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.color_dic['白色'])
+            self.screen.blit(text5, (bullet3_rect.left + 50, bullet3_rect.bottom + 50))
+            pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         self._show_exit_prompt()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = pygame.mouse.get_pos()
+                    if text3_rect.collidepoint(mouse_pos):
+                        self._exercise_mode()
                     if self.settings.bullets_num <= 0:
                         self.add_bullet = False
-                    if bullet2_rect.collidepoint(mouse_pos) and self.add_bullet:
+                    elif bullet2_rect.collidepoint(mouse_pos) and self.add_bullet:
                         self.b2_num += 1
                         self.settings.bullets_num -= 1
                         # 使用背景色填充旧的文本区域
@@ -696,11 +699,7 @@ class Game:
                         text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.color_dic['白色'])
                         self.screen.blit(text5, (bullet3_rect.left + 50, bullet3_rect.bottom + 50))
 
-                    elif text3_rect.collidepoint(mouse_pos):
-                        self._exercise_mode()
-                    pygame.display.flip()
 
-        pygame.display.flip()
 
     def _help_mode(self):
         background = self.settings.bg_image
