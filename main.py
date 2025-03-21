@@ -519,6 +519,7 @@ class Game:
         self.chosen_bullet = "bullet3"
         self.b2_num = 0
         self.b3_num = 0
+        self.mouse_left_pressed_time = 0
         self.add_bullet = True
         self.blood_display = BloodDisplay(self)
         self._create_fleet()
@@ -570,44 +571,8 @@ class Game:
                         sys.exit()
                     else:
                         running = False  # 退出循环
-                        self._refit_mode()
+                        self._upgrade_mode()
 
-    def _refit_mode(self):
-        for bullet in self.bullets.copy():
-            bullet.kill()
-        for bad_tank in self.bad_tanks.copy():
-            bad_tank.kill()
-        background = self.settings.bg_image
-        self.screen.blit(background, (0, 0))
-        # 加载按钮图片
-        button2_image = self.settings.button_2_image
-
-        # 获取按钮的矩形区域，并设置它们的位置
-        button2_rect = button2_image.get_rect()
-        button2_rect.topright = (self.settings.screen_width - 50, 50)  # 设置按钮2的位置
-        button4_rect = self.settings.button_4_image.get_rect()
-        button4_rect.bottomright = (self.settings.screen_width - 50, self.settings.screen_height - 50)
-
-        # 在屏幕上绘制按钮
-        self.screen.blit(button2_image, button2_rect)
-        self.screen.blit(self.settings.button_4_image, button4_rect)
-
-        pygame.display.flip()
-
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        pygame.quit()
-                        sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # 鼠标左键按下
-                        self.mouse_left_pressed_time = pygame.time.get_ticks()
-                        mouse_pos = event.pos
-                        if button2_rect.collidepoint(mouse_pos):
-                            self._upgrade_mode()
-                        elif button4_rect.collidepoint(mouse_pos):
-                            self._help_mode()
 
     def _exercise_mode(self):
         time.sleep(0.5)
@@ -640,6 +605,12 @@ class Game:
             text_rect = title_text.get_rect()
             text_rect.topleft = (40, 40)
             self.screen.blit(title_text, text_rect)
+
+            text0 = font0.render('帮助', True, self.settings.color_dic['火砖色'], self.settings.color_dic['浅石板灰'])
+            text0_rect = title_text.get_rect()
+            text0_rect.topright = (text0.get_width() + 40, self.settings.screen_height - text0.get_height())
+            self.screen.blit(text0, text0_rect)
+
             text2 = font2.render("温馨提示：装备只可以用于一次对战，对战结束后将自动清空武器~~", True,
                                  self.settings.color_dic['白色'])
             self.screen.blit(text2, (
@@ -677,6 +648,8 @@ class Game:
                     mouse_pos = pygame.mouse.get_pos()
                     if text3_rect.collidepoint(mouse_pos):
                         self._exercise_mode()
+                    if text0_rect.collidepoint(mouse_pos):
+                        self._help_mode()
                     if self.settings.bullets_num <= 0:
                         self.add_bullet = False
                     elif bullet2_rect.collidepoint(mouse_pos) and self.add_bullet:
@@ -701,6 +674,9 @@ class Game:
 
 
 
+
+
+
     def _help_mode(self):
         background = self.settings.bg_image
         self.screen.blit(background, (0, 0))
@@ -710,7 +686,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
-                        self._refit_mode()
+                        self._upgrade_mode()()
                 if event.type == pygame.QUIT:
                     running = False
             title_text = font.render(self.settings.help_text_title, True, self.settings.color_dic['白色'])
@@ -720,7 +696,7 @@ class Game:
             a = 0
             for text in self.settings.help_text:
                 a += 1
-                text_text = font.render(text, True, self.settings.color_dic['白色'])
+                text_text = font.render(text, True, self.settings.color_dic['深红'])
                 text_rect = text_text.get_rect()
                 text_rect.midtop = (self.settings.screen_width / 2, 10 + a * self.settings.word_interval)
                 self.screen.blit(text_text, text_rect)
@@ -826,7 +802,8 @@ class Game:
                             if file_content == '':
                                 file_content = '0'
                             f.write(str(int(file_content) + int(self.sb.score)))
-                        self._refit_mode()
+                        pygame.quit()
+                        sys.exit()
                     elif event.key == pygame.K_n:
                         waiting_for_input = False
 
@@ -865,7 +842,7 @@ class Game:
         self.sb.score = 0
         pygame.display.flip()
         time.sleep(2)
-        self._refit_mode()
+        self._upgrade_mode()
 
     def _update_bad_tanks(self):
         """更新坏坦克的位置"""
