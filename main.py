@@ -180,7 +180,7 @@ class Settings:
         self.bullet_height = 7
         self.default_direction = 'up'
         self.bad_tank_num = 6
-        self.ship_left = 3
+        self.good_tank__left = 5
         self.bad_tank1_blood = 7
         self.bad_tank2_blood = 5
         self.every_shoot_score_1 = 10
@@ -219,7 +219,7 @@ class BloodDisplay:
 
     def draw(self):
         """绘制剩余的血量"""
-        for i in range(self.settings.ship_left):
+        for i in range(self.settings.good_tank__left):
             blood_position = self.blood_rect.topleft
             blood_position = (blood_position[0] + i * (self.blood_rect.width + 5), blood_position[1])
             self.screen.blit(self.blood_image, blood_position)
@@ -281,30 +281,39 @@ class Explosion(Sprite):
 
 
 class Bullet1(Sprite):
-    """管理子弹的类"""
-
-    def __init__(self, game):
+    def __init__(self, game, bad_tank=None):
         super().__init__()
         self.screen = game.screen
         self.settings = game.settings
-        self.image = pygame.image.load('image/bullet1.png')  # 加载子弹图片
-        self.rect = self.image.get_rect()  # 初始化rect属性
-        self.color = 'yellow'
+        self.image = pygame.image.load('image/bullet1.png')
+        self.rect = self.image.get_rect()
 
-        # 根据坦克d的方向设置子弹的初始位置
-        if game.dic == 'up':
-            self.rect.midbottom = game.good_tank.rect.midtop
-        elif game.dic == 'down':
-            self.rect.midtop = game.good_tank.rect.midbottom
-        elif game.dic == 'right':
-            self.rect.midleft = game.good_tank.rect.midright
-        elif game.dic == 'left':
-            self.rect.midright = game.good_tank.rect.midleft
+        # 根据发射者类型设置方向和位置
+        if bad_tank is not None:
+            self.shooter = bad_tank
+            self.dic = bad_tank.dic
+            if self.dic == 'up':
+                self.rect.midbottom = bad_tank.rect.midtop
+            elif self.dic == 'down':
+                self.rect.midtop = bad_tank.rect.midbottom
+            elif self.dic == 'right':
+                self.rect.midleft = bad_tank.rect.midright
+            elif self.dic == 'left':
+                self.rect.midright = bad_tank.rect.midleft
+        else:
+            self.color = 'yellow'
+            self.dic = game.dic  # 使用全局方向
+            if self.dic == 'up':
+                self.rect.midbottom = game.good_tank.rect.midtop
+            elif self.dic == 'down':
+                self.rect.midtop = game.good_tank.rect.midbottom
+            elif self.dic == 'right':
+                self.rect.midleft = game.good_tank.rect.midright
+            elif self.dic == 'left':
+                self.rect.midright = game.good_tank.rect.midleft
 
-        self.y = float(self.rect.y)
         self.x = float(self.rect.x)
-        # 方向标识
-        self.dic = game.dic
+        self.y = float(self.rect.y)
 
     def update(self):
         if self.dic == 'up':
@@ -371,6 +380,8 @@ class BadTank1(Sprite):
         self.dic = self.settings.default_direction
         self.last_move_time = 0
         self.blood = self.settings.bad_tank1_blood
+        self.game = game  # 保存 Game 实例
+        self.bullets = pygame.sprite.Group()  # 新增子弹组
 
     def blitme(self):
         self.screen.blit(self.image, self.rect)
@@ -410,9 +421,15 @@ class BadTank1(Sprite):
                 else:
                     self.random_move()
 
+            new_bullet = Bullet1(self.game, bad_tank=self)
+            self.game.bullets.add(new_bullet)
+            self.settings.shoot.play()
+            self.last_move_time = current_time
+            
             self.rect.y = self.y
             self.rect.x = self.x
             self.last_move_time = current_time
+
 
 
 class BadTank2(BadTank1):
@@ -450,6 +467,11 @@ class BadTank2(BadTank1):
                     self.image = pygame.image.load('image\\tankL.gif')
                 else:
                     self.random_move()
+
+            new_bullet = Bullet1(self.game, bad_tank=self)
+            self.game.bullets.add(new_bullet)
+            self.settings.shoot.play()
+            self.last_move_time = current_time
 
             self.rect.y = self.y
             self.rect.x = self.x
@@ -578,6 +600,7 @@ class Game:
         time.sleep(0.5)
         while True:
             self._check_collision()
+            self._check_bullet_good_tank_collision()
             self._check_events()
             self.good_tank.update()
             self._update_bullets()
@@ -810,13 +833,13 @@ class Game:
     def _check_collision(self):
         """检查好坦克与坏坦克的碰撞"""
         if pygame.sprite.spritecollideany(self.good_tank, self.bad_tanks):
-            self._ship_hit()
-            if self.settings.ship_left == 0:
+            self._good_tank_hit()
+            if self.settings.good_tank__left == 0:
                 self._one_game_over()
 
-    def _ship_hit(self):
+    def _good_tank_hit(self):
         """响应好坦克被撞到"""
-        self.settings.ship_left -= 1
+        self.settings.good_tank__left -= 1
         self.bad_tanks.empty()
         self.bullets.empty()
         self._create_fleet()
@@ -870,36 +893,57 @@ class Game:
         self._check_bullet_bad_tanks_collision()
 
     def _check_bullet_bad_tanks_collision(self):
-        """检查子弹与坏坦克的碰撞"""
-        collisions = pygame.sprite.groupcollide(self.bullets, self.bad_tanks, True, False)  # 修改为False，不删除坏坦克
-        if collisions:
-            self.settings.strike.play()
-            self.sb.prep_score()
-            for bullet, bad_tank_list in collisions.items():
-                for tank in bad_tank_list:
+        """检查子弹与坏坦克的碰撞（排除发射者自身）"""
+        for bullet in self.bullets:
+            # 跳过由坏坦克发射的子弹与自身碰撞
+            if hasattr(bullet, 'shooter') and bullet.shooter in self.bad_tanks:
+                continue  # 直接跳过该子弹的碰撞检测
+
+            # 检测子弹与所有坏坦克的碰撞
+            collisions = pygame.sprite.spritecollide(bullet, self.bad_tanks, False)
+            if collisions:
+                # 处理碰撞逻辑（仅针对非发射者）
+                self.settings.strike.play()
+                self.sb.prep_score()
+                for tank in collisions:
                     if isinstance(tank, (BadTank1, BadTank2)):
                         if bullet.color == 'yellow':
                             tank.blood -= self.settings.yellow_shoot_damage
                             self.sb.score += self.settings.every_shoot_score_1
-
                         elif bullet.color == 'red':
                             tank.blood -= self.settings.red_shoot_damage
                             self.sb.score += self.settings.every_shoot_score_2
-
                         elif bullet.color == 'green':
                             tank.blood -= self.settings.yellow_shoot_damage
                             self.sb.score += self.settings.every_shoot_score_1
 
-                        # 检查血量
+                        # 检查血量是否归零
                         if tank.blood <= 0:
                             self.settings.blast.play()
                             explosion = Explosion(self, tank.rect.center)
                             self.bad_tanks.add(explosion)
                             self.bad_tanks.remove(tank)
 
-        if not self.bad_tanks:
-            self.bullets.empty()
-            self._create_fleet()
+                # 移除子弹（仅当子弹与敌人碰撞时）
+                bullet.kill()
+
+    def _check_bullet_good_tank_collision(self):
+        """检测坏坦克子弹与好坦克的碰撞"""
+        # 遍历所有子弹
+        for bullet in self.bullets:
+            # 检查是否是坏坦克发射的子弹
+            if hasattr(bullet, 'shooter') and isinstance(bullet.shooter, (BadTank1, BadTank2)):
+                # 检测子弹与好坦克的碰撞
+                if pygame.sprite.collide_rect(bullet, self.good_tank):
+                    self.settings.good_tank__left -= 1
+                    self.bad_tanks.empty()
+                    self.bullets.empty()
+                    self._create_fleet()
+                    self.good_tank.center_tank()
+                    self.blood_display.draw()
+                    time.sleep(0.5)
+                    if self.settings.good_tank__left == 0:
+                        self._one_game_over()
 
     def _fire_bullet(self, pattern='yellow'):
         if pattern == 'yellow':
