@@ -610,7 +610,7 @@ class Game:
                     self.bullets.remove(bullet)
             self._update_screen()
 
-    def _upgrade_mode(self):
+    def _upgrade_mode(self, try_again=False):
         running = True
         while running:
             # 每次循环重新计算beta
@@ -622,7 +622,7 @@ class Game:
             font0 = pygame.font.Font(self.settings.font_path, 70)
             font1 = pygame.font.Font(self.settings.font_path, 50)
             font2 = pygame.font.Font(self.settings.font_path, 30)
-            with open("other/data.txt", "r", encoding="utf-8") as f:
+            with open("other/data.json", "r", encoding="utf-8") as f:
                 content = f.read()
             title_text = font1.render('装备区', True, self.settings.color_dic['白色'])
             text_rect = title_text.get_rect()
@@ -658,10 +658,18 @@ class Game:
             self.screen.blit(bullet2_image, bullet2_rect)
             self.screen.blit(bullet3_image, bullet3_rect)
 
-            text4 = font2.render(f"子弹2：{self.b2_num}", True, self.settings.color_dic['白色'])
-            self.screen.blit(text4, (bullet2_rect.left + 50, bullet2_rect.bottom + 50))
-            text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.color_dic['白色'])
-            self.screen.blit(text5, (bullet3_rect.left + 50, bullet3_rect.bottom + 50))
+            if not try_again:
+                text4 = font2.render(f"子弹2：{self.b2_num}", True, self.settings.color_dic['白色'])
+                self.screen.blit(text4, (bullet2_rect.left + 50, bullet2_rect.bottom + 50))
+                text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.color_dic['白色'])
+                self.screen.blit(text5, (bullet3_rect.left + 50, bullet3_rect.bottom + 50))
+            else:
+                self.b2_num = 0
+                self.b3_num = 0
+                text4 = font2.render(f"子弹2：{self.b2_num}", True, self.settings.color_dic['白色'])
+                self.screen.blit(text4, (bullet2_rect.left + 50, bullet2_rect.bottom + 50))
+                text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.color_dic['白色'])
+                self.screen.blit(text5, (bullet3_rect.left + 50, bullet3_rect.bottom + 50))
             pygame.display.flip()
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -746,7 +754,7 @@ class Game:
                 elif event.key == pygame.K_LCTRL or event.key == pygame.K_RCTRL:
                     self._choose_things()
                 elif event.key == pygame.K_q:
-                    self._show_exit_prompt()
+                    self._show_exit_prompt(inside=True)
             elif event.type == pygame.KEYUP:  # 添加按键释放事件处理
                 if event.key == pygame.K_d:
                     self.good_tank.moving_right = False
@@ -809,7 +817,7 @@ class Game:
                         self.chosen_bullet = 'bullet3'
                         waiting_for_click = False
 
-    def _show_exit_prompt(self, text="退出并保存 (Y/N)"):
+    def _show_exit_prompt(self, text="退出并保存 (Y/N)", inside=False):
         """显示退出提示并等待用户响应"""
         font = pygame.font.Font(self.settings.font_path, 80)
         text = font.render(text, True, self.settings.color_dic['白色'])
@@ -820,13 +828,16 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_y:
-                        with open('other/data.txt', 'w+') as f:
-                            file_content = f.read()
-                            if file_content == '':
-                                file_content = '0'
-                            f.write(str(int(file_content) + int(self.sb.score)))
-                        pygame.quit()
-                        sys.exit()
+                        if not inside:
+                            with open('other/data.json', 'w+') as f:
+                                file_content = f.read()
+                                if file_content == '':
+                                    file_content = '0'
+                                f.write(str(int(file_content) + int(self.sb.score)))
+                            pygame.quit()
+                            sys.exit()
+                        else:
+                            self._upgrade_mode(try_again=True)
                     elif event.key == pygame.K_n:
                         waiting_for_input = False
 
@@ -865,7 +876,7 @@ class Game:
         self.sb.score = 0
         pygame.display.flip()
         time.sleep(2)
-        self._upgrade_mode()
+        self._upgrade_mode(try_again=True)
 
     def _update_bad_tanks(self):
         """更新坏坦克的位置"""
