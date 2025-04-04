@@ -200,7 +200,7 @@ class Settings:
         self.bg_image = pygame.image.load('image/background.jpg')
         self.start_image = pygame.image.load('image/startgame.jpg')
         self.back_ground_music1 = 'music/bgm1.mp3'
-        self.back_ground_music2 = pygame.mixer.Sound('music/bgm2.mp3')
+        self.back_ground_music2 = 'music/bgm2.mp3'
         self.blast = pygame.mixer.Sound('music/爆炸.mp3')
         self.good_tank_shoot = pygame.mixer.Sound('music/好坦克射击.mp3')
         self.bad_tank_shoot = pygame.mixer.Sound('music/坏坦克射击.mp3')
@@ -551,8 +551,8 @@ class Game:
         self._start_game()
 
     def _start_game(self):
-        thread = threading.Thread(target=self._music1)
-        thread.start()
+        thread1 = threading.Thread(target=self._music1)
+        thread1.start()
 
         start_image = self.settings.start_image
         start_rect = start_image.get_rect()
@@ -596,14 +596,15 @@ class Game:
                         pygame.quit()
                         sys.exit()
                     else:
-                        pygame.mixer.music.stop()
-                        thread.join()
                         running = False  # 退出循环
-                        self._upgrade_mode()
+                        self._upgrade_mode(thread1)
 
 
     def _exercise_mode(self):
         time.sleep(0.5)
+        global thread2
+        thread2 = threading.Thread(target=self._music2)
+        thread2.start()
         while True:
             self._check_collision()
             self._check_bullet_good_tank_collision()
@@ -616,7 +617,10 @@ class Game:
                     self.bullets.remove(bullet)
             self._update_screen()
 
-    def _upgrade_mode(self, inside=False):
+    def _upgrade_mode(self, t1=None, inside=False):
+        if not pygame.mixer.get_init():
+            pygame.mixer.init()
+        self._music1()  # 重新播放主菜单音乐
         running = True
         while running:
             # 每次循环重新计算beta
@@ -684,6 +688,9 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = pygame.mouse.get_pos()
                     if text3_rect.collidepoint(mouse_pos):
+                        pygame.mixer.music.stop()
+                        if t1 is not None:
+                            t1.join()
                         self._exercise_mode()
                     if text0_rect.collidepoint(mouse_pos):
                         self._help_mode()
@@ -790,9 +797,18 @@ class Game:
                             self._fire_bullet('gold')
 
     def _music1(self):
-        pygame.mixer.init()
+        """播放主菜单音乐"""
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.stop()
         pygame.mixer.music.load(self.settings.back_ground_music1)
-        pygame.mixer.music.play()
+        pygame.mixer.music.play(-1)
+
+    def _music2(self):
+        """播放战斗音乐"""
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.stop()
+        pygame.mixer.music.load(self.settings.back_ground_music2)
+        pygame.mixer.music.play(-1)
 
     def _choose_things(self):
         # 显示文字
@@ -876,6 +892,7 @@ class Game:
         for bad_tank in self.bad_tanks.copy():
             bad_tank.kill()
         self.settings.good_tank_left = -1
+        pygame.mixer.music.stop()
         pygame.display.flip()
         font = pygame.font.Font(self.settings.font_path, 80)
         if not myself:
