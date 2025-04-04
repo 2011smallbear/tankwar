@@ -1,6 +1,7 @@
 import math
 import random
 import sys
+import threading
 import time
 
 import pygame
@@ -180,9 +181,9 @@ class Settings:
         self.bullet_height = 7
         self.default_direction = 'up'
         self.bad_tank_num = 6
-        self.good_tank__left = 5
-        self.bad_tank1_blood = 7
-        self.bad_tank2_blood = 5
+        self.good_tank_left = 7
+        self.bad_tank1_blood = 5
+        self.bad_tank2_blood = 3
         self.every_shoot_score_1 = 10
         self.every_shoot_score_2 = 20
         self.yellow_shoot_damage = 1
@@ -198,8 +199,11 @@ class Settings:
         self.button_4_image = pygame.image.load('image/button4.png')
         self.bg_image = pygame.image.load('image/background.jpg')
         self.start_image = pygame.image.load('image/startgame.jpg')
+        self.back_ground_music1 = 'music/bgm1.mp3'
+        self.back_ground_music2 = pygame.mixer.Sound('music/bgm2.mp3')
         self.blast = pygame.mixer.Sound('music/爆炸.mp3')
-        self.shoot = pygame.mixer.Sound('music/射击.mp3')
+        self.good_tank_shoot = pygame.mixer.Sound('music/好坦克射击.mp3')
+        self.bad_tank_shoot = pygame.mixer.Sound('music/坏坦克射击.mp3')
         self.strike = pygame.mixer.Sound('music/撞击.mp3')
         self.help_text_title = '你好，玩家！'
         self.help_text = ['1.在任何时候按下Q键以退出游戏/回到主界面。',
@@ -219,7 +223,7 @@ class BloodDisplay:
 
     def draw(self):
         """绘制剩余的血量"""
-        for i in range(self.settings.good_tank__left):
+        for i in range(self.settings.good_tank_left):
             blood_position = self.blood_rect.topleft
             blood_position = (blood_position[0] + i * (self.blood_rect.width + 5), blood_position[1])
             self.screen.blit(self.blood_image, blood_position)
@@ -423,7 +427,7 @@ class BadTank1(Sprite):
 
             new_bullet = Bullet1(self.game, bad_tank=self)
             self.game.bullets.add(new_bullet)
-            self.settings.shoot.play()
+            self.settings.good_tank_shoot.play()
             self.last_move_time = current_time
             
             self.rect.y = self.y
@@ -468,9 +472,6 @@ class BadTank2(BadTank1):
                 else:
                     self.random_move()
 
-            new_bullet = Bullet1(self.game, bad_tank=self)
-            self.game.bullets.add(new_bullet)
-            self.settings.shoot.play()
             self.last_move_time = current_time
 
             self.rect.y = self.y
@@ -550,6 +551,9 @@ class Game:
         self._start_game()
 
     def _start_game(self):
+        thread = threading.Thread(target=self._music1)
+        thread.start()
+
         start_image = self.settings.start_image
         start_rect = start_image.get_rect()
         start_rect.center = (self.settings.screen_width // 2, self.settings.screen_height // 2)
@@ -592,6 +596,8 @@ class Game:
                         pygame.quit()
                         sys.exit()
                     else:
+                        pygame.mixer.music.stop()
+                        thread.join()
                         running = False  # 退出循环
                         self._upgrade_mode()
 
@@ -610,7 +616,7 @@ class Game:
                     self.bullets.remove(bullet)
             self._update_screen()
 
-    def _upgrade_mode(self, try_again=False):
+    def _upgrade_mode(self, inside=False):
         running = True
         while running:
             # 每次循环重新计算beta
@@ -642,9 +648,9 @@ class Game:
             bullet_text = font1.render(f"装载弹量限额：{self.settings.bullets_num}", True,
                                        self.settings.color_dic['白色'])
             bullet_rect = bullet_text.get_rect()
-            self.screen.blit(bullet_text, (self.settings.screen_width - 400, 60))
+            self.screen.blit(bullet_text, (self.settings.screen_width - 400, 50))
             beta = int(128 + 127 * math.sin(math.radians(pygame.time.get_ticks() / 5)))
-            text3 = font0.render("现在开始游戏！", True, text_color)  # 使用动态颜色
+            text3 = font0.render("点此开始游戏！", True, text_color)  # 使用动态颜色
             text3_rect = text3.get_rect()
             text3_rect.topleft = (self.settings.screen_width - 430, self.settings.screen_height - 60)
             self.screen.blit(text3, (self.settings.screen_width - 450, self.settings.screen_height - 60))
@@ -658,7 +664,7 @@ class Game:
             self.screen.blit(bullet2_image, bullet2_rect)
             self.screen.blit(bullet3_image, bullet3_rect)
 
-            if not try_again:
+            if not inside:
                 text4 = font2.render(f"子弹2：{self.b2_num}", True, self.settings.color_dic['白色'])
                 self.screen.blit(text4, (bullet2_rect.left + 50, bullet2_rect.bottom + 50))
                 text5 = font2.render(f"子弹3：{self.b3_num}", True, self.settings.color_dic['白色'])
@@ -783,6 +789,11 @@ class Game:
                             self.b3_num -= 1
                             self._fire_bullet('gold')
 
+    def _music1(self):
+        pygame.mixer.init()
+        pygame.mixer.music.load(self.settings.back_ground_music1)
+        pygame.mixer.music.play()
+
     def _choose_things(self):
         # 显示文字
         font = pygame.font.Font(self.settings.font_path, 36)
@@ -837,7 +848,7 @@ class Game:
                             pygame.quit()
                             sys.exit()
                         else:
-                            self._upgrade_mode(try_again=True)
+                            self._one_game_over(myself=True)
                     elif event.key == pygame.K_n:
                         waiting_for_input = False
 
@@ -845,12 +856,12 @@ class Game:
         """检查好坦克与坏坦克的碰撞"""
         if pygame.sprite.spritecollideany(self.good_tank, self.bad_tanks):
             self._good_tank_hit()
-            if self.settings.good_tank__left == 0:
+            if self.settings.good_tank_left == 0:
                 self._one_game_over()
 
     def _good_tank_hit(self):
         """响应好坦克被撞到"""
-        self.settings.good_tank__left -= 1
+        self.settings.good_tank_left -= 1
         self.bad_tanks.empty()
         self.bullets.empty()
         self._create_fleet()
@@ -858,16 +869,20 @@ class Game:
         self.blood_display.draw()
         time.sleep(0.5)
 
-    def _one_game_over(self):
+    def _one_game_over(self, myself=False):
         """ 单次游戏结束"""
         for bullet in self.bullets.copy():
             bullet.kill()
         for bad_tank in self.bad_tanks.copy():
             bad_tank.kill()
+        self.settings.good_tank_left = -1
         pygame.display.flip()
         font = pygame.font.Font(self.settings.font_path, 80)
-        text = font.render("您已死亡，即将退回主界面", True, self.settings.color_dic['白色'])
-        self.screen.blit(text, (self.settings.screen_width / 2 - text.get_width() / 2, self.settings.screen_height / 2))
+        if not myself:
+            text = font.render("您已死亡，即将退回主界面", True, self.settings.color_dic['白色'])
+            self.screen.blit(text, (self.settings.screen_width / 2 - text.get_width() / 2, self.settings.screen_height / 2))
+        else:
+            pass
         with open('other/data.txt', 'w+') as f:
             file_content = f.read()
             if file_content == '':
@@ -875,8 +890,11 @@ class Game:
             f.write(str(int(file_content) + int(self.sb.score)))
         self.sb.score = 0
         pygame.display.flip()
-        time.sleep(2)
-        self._upgrade_mode(try_again=True)
+        time.sleep(1)
+        if not myself:
+            self._upgrade_mode()
+        else:
+            self._upgrade_mode(inside=True)
 
     def _update_bad_tanks(self):
         """更新坏坦克的位置"""
@@ -946,29 +964,29 @@ class Game:
             if hasattr(bullet, 'shooter') and isinstance(bullet.shooter, (BadTank1, BadTank2)):
                 # 检测子弹与好坦克的碰撞
                 if pygame.sprite.collide_rect(bullet, self.good_tank):
-                    self.settings.good_tank__left -= 1
+                    self.settings.good_tank_left -= 1
                     self.bad_tanks.empty()
                     self.bullets.empty()
                     self._create_fleet()
                     self.good_tank.center_tank()
                     self.blood_display.draw()
                     time.sleep(0.5)
-                    if self.settings.good_tank__left == 0:
+                    if self.settings.good_tank_left == 0:
                         self._one_game_over()
 
     def _fire_bullet(self, pattern='yellow'):
         if pattern == 'yellow':
             new_bullet = Bullet1(self)
             self.bullets.add(new_bullet)
-            self.settings.shoot.play()
+            self.settings.good_tank_shoot.play()
         elif pattern == 'red' and self.b2_num > 0:
             new_bullet = Bullet2(self)
             self.bullets.add(new_bullet)
-            self.settings.shoot.play()
+            self.settings.good_tank_shoot.play()
         elif pattern == 'gold' and self.b3_num > 0:
             new_bullet = Bullet3(self)
             self.bullets.add(new_bullet)
-            self.settings.shoot.play()
+            self.settings.good_tank_shoot.play()
         elif self.b2_num < 0 or self.b3_num < 0:
             font = pygame.font.Font(self.settings.font_path, 80)
             text = font.render('该型号子弹已空 (Y)', True, self.settings.color_dic['白色'])
