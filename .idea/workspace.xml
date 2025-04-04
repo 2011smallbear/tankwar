@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="7ad364c0-deb6-480e-84de-8044a064d913" name="更改" comment="git commit -m &quot;添加战斗音乐&quot;" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;2011smallbear&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/2011smallbear/tankwar.git&quot;,
+    &quot;accountId&quot;: &quot;33a2dae9-de5f-452d-b8a5-0b49aa07ec4c&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2oTACc1Hsu8l1CV10x32rlnClOK" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.fitten.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.unittest.executor&quot;: &quot;Run&quot;,
+    &quot;Python.旋转图片.executor&quot;: &quot;Run&quot;,
+    &quot;Python.练习.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;full.screen.before.presentation.mode&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/python/python自己/坦克大战/image&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;advanced.settings&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\python\python自己\坦克大战\image" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\python\phython自己\坦克大战\image" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.main">
+    <configuration name="练习" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="坦克大战" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/练习.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="旋转图片" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="坦克大战" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/旋转图片.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="fitten" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="坦克大战" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fitten.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="坦克大战" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.12" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="unittest" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="坦克大战" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/unittest.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.main" />
+        <item itemvalue="Python.fitten" />
+        <item itemvalue="Python.unittest" />
+        <item itemvalue="Python.练习" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-4f4e415b4190-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.26053.29" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="7ad364c0-deb6-480e-84de-8044a064d913" name="更改" comment="" />
+      <created>1730883065349</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1730883065349</updated>
+    </task>
+    <task id="LOCAL-00001" summary="git commit -m &quot;好坦克与坏坦克都已经就绪&quot;">
+      <option name="closed" value="true" />
+      <created>1731977493584</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1731977493584</updated>
+    </task>
+    <task id="LOCAL-00002" summary="git commit -m &quot;坏坦克可以随机移动&quot;">
+      <option name="closed" value="true" />
+      <created>1731985090907</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1731985090907</updated>
+    </task>
+    <task id="LOCAL-00003" summary="git commit -m &quot;好坦克设计坏坦克会消失&quot;">
+      <option name="closed" value="true" />
+      <created>1731986300144</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1731986300144</updated>
+    </task>
+    <task id="LOCAL-00004" summary="git commit -m &quot;基础的好坏坦克功能，剩余坏坦克数量碰撞检测&quot;">
+      <option name="closed" value="true" />
+      <created>1732970370326</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1732970370326</updated>
+    </task>
+    <task id="LOCAL-00005" summary="git commit -m &quot;增加了重置，音效，碰撞检测&quot;">
+      <option name="closed" value="true" />
+      <created>1733049040702</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1733049040703</updated>
+    </task>
+    <task id="LOCAL-00006" summary="git commit -m &quot;增加了血量&quot;">
+      <option name="closed" value="true" />
+      <created>1733479227938</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1733479227942</updated>
+    </task>
+    <task id="LOCAL-00007" summary="git commit -m &quot;爆炸音效和随机生成坏坦克的位置&quot;">
+      <option name="closed" value="true" />
+      <created>1733481567324</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1733481567324</updated>
+    </task>
+    <task id="LOCAL-00008" summary="git commit -m &quot;添加了第二种坦克和坦克的多次射击才会死&quot;">
+      <option name="closed" value="true" />
+      <created>1733568394662</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1733568394662</updated>
+    </task>
+    <task id="LOCAL-00009" summary="git commit -m &quot;坏坦克的血条&quot;">
+      <option name="closed" value="true" />
+      <created>1733576906812</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1733576906812</updated>
+    </task>
+    <task id="LOCAL-00010" summary="git commit -m &quot;为爆炸添加了渐淡效果&quot;">
+      <option name="closed" value="true" />
+      <created>1733650393710</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1733650393711</updated>
+    </task>
+    <task id="LOCAL-00011" summary="git commit -m &quot;优化了射击算法&quot;">
+      <option name="closed" value="true" />
+      <created>1734008208718</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1734008208718</updated>
+    </task>
+    <task id="LOCAL-00012" summary="git commit -m &quot;继续优化了射击算法&quot;">
+      <option name="closed" value="true" />
+      <created>1734008323567</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1734008323567</updated>
+    </task>
+    <task id="LOCAL-00013" summary="git commit -m &quot;修复了子弹射击问题&quot;">
+      <option name="closed" value="true" />
+      <created>1734010523630</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1734010523630</updated>
+    </task>
+    <task id="LOCAL-00014" summary="git commit -m &quot;更改了子弹发射的操作，改成了鼠标&quot;">
+      <option name="closed" value="true" />
+      <created>1734569208894</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1734569208894</updated>
+    </task>
+    <task id="LOCAL-00015" summary="git commit -m &quot;增加了装备大厅，优化了子弹射击的初始位置&quot;">
+      <option name="closed" value="true" />
+      <created>1734703214160</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1734703214160</updated>
+    </task>
+    <task id="LOCAL-00016" summary="git commit -m &quot;修复了坦克会走出屏幕的问题&quot;">
+      <option name="closed" value="true" />
+      <created>1734703510107</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1734703510107</updated>
+    </task>
+    <task id="LOCAL-00017" summary="git commit -m &quot;增加了帮助模式&quot;">
+      <option name="closed" value="true" />
+      <created>1734747401258</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1734747401258</updated>
+    </task>
+    <task id="LOCAL-00018" summary="git commit -m &quot;增加了对战时选择强力子弹和一种新的子弹，增加了装备区，装备区还没有代码&quot;">
+      <option name="closed" value="true" />
+      <created>1735289281005</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1735289281005</updated>
+    </task>
+    <task id="LOCAL-00019" summary="git commit -m &quot;增加了装备子弹的数量有限的逻辑&quot;">
+      <option name="closed" value="true" />
+      <created>1735645793891</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1735645793891</updated>
+    </task>
+    <task id="LOCAL-00020" summary="git commit -m &quot;增加启动画面，增加rgb颜色列表，将风格改为恐怖&quot;">
+      <option name="closed" value="true" />
+      <created>1742122997336</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1742122997336</updated>
+    </task>
+    <task id="LOCAL-00021" summary="git commit -m &quot;为装备区块增加渐变的按钮&quot;">
+      <option name="closed" value="true" />
+      <created>1742389786150</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1742389786150</updated>
+    </task>
+    <task id="LOCAL-00022" summary="git commit -m &quot;删除了按钮的界面，直接进入装备区域&quot;">
+      <option name="closed" value="true" />
+      <created>1742560118694</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1742560118695</updated>
+    </task>
+    <task id="LOCAL-00023" summary="git commit -m &quot;让坏坦克也可以射击&quot;">
+      <option name="closed" value="true" />
+      <created>1742985057858</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1742985057858</updated>
+    </task>
+    <task id="LOCAL-00024" summary="git commit -m &quot;解决了重开时子弹复数的bug&quot;">
+      <option name="closed" value="true" />
+      <created>1743337966540</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1743337966540</updated>
+    </task>
+    <task id="LOCAL-00025" summary="git commit -m &quot;添加启动音乐，让普通坏坦克不射击，修复了重新开始时保留上次游玩状态的bug&quot;">
+      <option name="closed" value="true" />
+      <created>1743741522968</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1743741522968</updated>
+    </task>
+    <task id="LOCAL-00026" summary="git commit -m &quot;添加战斗音乐&quot;">
+      <option name="closed" value="true" />
+      <created>1743771106712</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1743771106712</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="git commit -m &quot;坏坦克可以随机移动&quot;" />
+    <MESSAGE value="git commit -m &quot;好坦克设计坏坦克会消失&quot;" />
+    <MESSAGE value="git commit -m &quot;基础的好坏坦克功能，剩余坏坦克数量碰撞检测&quot;" />
+    <MESSAGE value="git commit -m &quot;增加了重置，音效，碰撞检测&quot;" />
+    <MESSAGE value="git commit -m &quot;增加了血量&quot;" />
+    <MESSAGE value="git commit -m &quot;爆炸音效和随机生成坏坦克的位置&quot;" />
+    <MESSAGE value="git commit -m &quot;添加了第二种坦克和坦克的多次射击才会死&quot;" />
+    <MESSAGE value="git commit -m &quot;坏坦克的血条&quot;" />
+    <MESSAGE value="git commit -m &quot;为爆炸添加了渐淡效果&quot;" />
+    <MESSAGE value="git commit -m &quot;优化了射击算法&quot;" />
+    <MESSAGE value="git commit -m &quot;继续优化了射击算法&quot;" />
+    <MESSAGE value="git commit -m &quot;修复了子弹射击问题&quot;" />
+    <MESSAGE value="git commit -m &quot;更改了子弹发射的操作，改成了鼠标&quot;" />
+    <MESSAGE value="git commit -m &quot;增加了装备大厅，优化了子弹射击的初始位置&quot;" />
+    <MESSAGE value="git commit -m &quot;修复了坦克会走出屏幕的问题&quot;" />
+    <MESSAGE value="git commit -m &quot;增加了帮助模式&quot;" />
+    <MESSAGE value="git commit -m &quot;增加了对战时选择强力子弹和一种新的子弹，增加了装备区，装备区还没有代码&quot;" />
+    <MESSAGE value="git commit -m &quot;增加了装备子弹的数量有限的逻辑&quot;" />
+    <MESSAGE value="git commit -m &quot;增加启动画面，增加rgb颜色列表，将风格改为恐怖&quot;" />
+    <MESSAGE value="git commit -m &quot;为装备区块增加渐变的按钮&quot;" />
+    <MESSAGE value="git commit -m &quot;删除了按钮的界面，直接进入装备区域&quot;" />
+    <MESSAGE value="git commit -m &quot;让坏坦克也可以射击&quot;" />
+    <MESSAGE value="git commit -m &quot;解决了重开时子弹复数的bug&quot;" />
+    <MESSAGE value="git commit -m &quot;添加启动音乐，让普通坏坦克不射击，修复了重新开始时保留上次游玩状态的bug&quot;" />
+    <MESSAGE value="git commit -m &quot;添加战斗音乐&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="git commit -m &quot;添加战斗音乐&quot;" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="self.b2_num" language="Python" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>
