@@ -2,6 +2,7 @@ import math
 import random
 import sys
 import threading
+import numba
 import time
 
 import pygame
@@ -172,11 +173,11 @@ class Settings:
         }
         self.word_interval = 45
         self.font_path = 'other/字体.ttf'
-        self.tank_speed = 4.0
+        self.tank_speed = 6.0
         self.bad_tank_speed = self.tank_speed / 2
-        self.bullet_speed = 6.0
+        self.bullet_speed = 10.0
         self.bullets_num = 50
-        self.super_bullet_speed = 8.0
+        self.super_bullet_speed = 12.0
         self.bullet_width = 7
         self.bullet_height = 7
         self.default_direction = 'up'
@@ -190,6 +191,10 @@ class Settings:
         self.red_shoot_damage = 2
         self.yellow_shoot_money = 3
         self.red_shoot_money = 5
+        self.border_width = 20  # 边框宽度
+        self.border_flash_speed = 300  # 闪烁间隔（毫秒）
+        self.border_color = (255, 0, 0)  # 基础颜色
+        self.min_flash_alpha = 50
         self.blood_image = pygame.image.load('image/blood.png')
         self.bullet_image = pygame.image.load('image/bullet1.png')
         self.bullet2_image = pygame.image.load('image/bullet2#.png')
@@ -533,16 +538,20 @@ class Game:
         pygame.display.set_caption('坦克大战')
         pygame.mixer.init()
         self.settings = Settings()
-        self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
+        self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height), pygame.SRCALPHA)
         self.sb = ScoreBoard(self)
         self.dic = self.settings.default_direction
         self.good_tank = GoodTank(self, self.settings)
         self.bad_tanks = pygame.sprite.Group()
+        self.explosions = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
         self.chosen_bullet = "bullet3"
         self.b2_num = 0
         self.b3_num = 0
         self.mouse_left_pressed_time = 0
+        self.border_alpha = 255  # 边框透明度
+        self.flash_border = False  # 闪烁标志
+        self.last_flash_time = 0  # 最后闪烁时间
         self.add_bullet = True
         self.blood_display = BloodDisplay(self)
         self._create_fleet()
@@ -597,7 +606,7 @@ class Game:
                         sys.exit()
                     else:
                         running = False  # 退出循环
-                        self._upgrade_mode(thread1)
+                        self._upgrade_mode()
 
 
     def _exercise_mode(self):
@@ -605,14 +614,25 @@ class Game:
         global thread2
         thread2 = threading.Thread(target=self._music2)
         thread2.start()
+        # 无限循环
         while True:
+            # 检查碰撞
             self._check_collision()
+            # 检查子弹与敌方坦克的碰撞
             self._check_bullet_good_tank_collision()
+            # 检查事件
             self._check_events()
+            # 更新我方坦克
             self.good_tank.update()
+            # 更新子弹
             self._update_bullets()
+            # 更新敌方坦克
             self._update_bad_tanks()
+            # 检查边界碰撞
+            self._check_border_collision()
+            # 遍历子弹列表
             for bullet in self.bullets.copy():
+                # 如果子弹超出屏幕边界，则移除子弹
                 if bullet.rect.bottom <= 0 or bullet.rect.right <= 0 or bullet.rect.left >= self.settings.screen_width:
                     self.bullets.remove(bullet)
             self._update_screen()
@@ -810,6 +830,46 @@ class Game:
         pygame.mixer.music.load(self.settings.back_ground_music2)
         pygame.mixer.music.play(-1)
 
+    def _draw_border(self):
+        """动态渐变边框闪烁"""
+        # 基础边框（固定渐变）
+        border_surface = pygame.Surface((self.settings.screen_width, self.settings.screen_height), pygame.SRCALPHA)
+        for i in range(self.settings.border_width):
+            alpha = int(255 * ((self.settings.border_width - i) / self.settings.border_width))
+            color = (*self.settings.border_color, alpha)
+            pygame.draw.rect(border_surface, color,
+                             (i, i, self.settings.screen_width - 2 * i, self.settings.screen_height - 2 * i), 1)
+        self.screen.blit(border_surface, (0, 0))
+
+        # 渐变闪烁逻辑
+        if self.flash_border:
+            current_time = pygame.time.get_ticks()
+            # 计算 alpha 值的正弦波动（周期 1000ms）
+            self.border_alpha = int(255 * abs(math.sin(math.radians(current_time / 2)))) # 调整除数控制频率
+            self.border_alpha = max(self.settings.min_flash_alpha, self.border_alpha)  # 保持最低可见度
+
+            # 绘制渐变闪烁层
+            flash_surface = pygame.Surface((self.settings.screen_width, self.settings.screen_height), pygame.SRCALPHA)
+            for i in range(self.settings.border_width):
+                color = (255, 0, 0, self.border_alpha)  # 红色闪烁层
+            pygame.draw.rect(flash_surface, color,
+                             (i, i, self.settings.screen_width - 2 * i, self.settings.screen_height - 2 * i), 1)
+            self.screen.blit(flash_surface, (0, 0))
+
+    def _check_border_collision(self):
+        """检查坏坦克与边框的碰撞"""
+        border_rect = pygame.Rect(
+            self.settings.border_width,
+            self.settings.border_width,
+            self.settings.screen_width - self.settings.border_width * 2,
+            self.settings.screen_height - self.settings.border_width * 2
+        )
+        # 只处理坏坦克
+        for tank in self.bad_tanks:
+            if not border_rect.contains(tank.rect):
+                tank.rect.clamp_ip(border_rect)
+                tank.random_move()
+
     def _choose_things(self):
         # 显示文字
         font = pygame.font.Font(self.settings.font_path, 36)
@@ -868,6 +928,7 @@ class Game:
                     elif event.key == pygame.K_n:
                         waiting_for_input = False
 
+
     def _check_collision(self):
         """检查好坦克与坏坦克的碰撞"""
         if pygame.sprite.spritecollideany(self.good_tank, self.bad_tanks):
@@ -912,6 +973,7 @@ class Game:
             self._upgrade_mode()
         else:
             self._upgrade_mode(inside=True)
+
 
     def _update_bad_tanks(self):
         """更新坏坦克的位置"""
@@ -973,6 +1035,7 @@ class Game:
                 # 移除子弹（仅当子弹与敌人碰撞时）
                 bullet.kill()
 
+
     def _check_bullet_good_tank_collision(self):
         """检测坏坦克子弹与好坦克的碰撞"""
         # 遍历所有子弹
@@ -1030,6 +1093,8 @@ class Game:
                 explosion.blitme()
         self.sb.show_score()
         self.blood_display.draw()
+        self._draw_border()
+
         pygame.display.flip()
 
 
